@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createCloudAdapter } from "@healthtwin/supabase";
+import { fromSampleRow, type Sample } from "@healthtwin/vitals";
 import type { Observation } from "@healthtwin/core";
 
 /** Extract the bearer access token from an API request. */
@@ -31,4 +32,15 @@ export async function pullAll(client: SupabaseClient): Promise<Observation[]> {
     cursor = page.cursor;
   }
   return all;
+}
+
+/** Pull every vitals sample the client is allowed to read (RLS-scoped). */
+export async function pullSamples(client: SupabaseClient): Promise<Sample[]> {
+  const { data, error } = await client
+    .from("samples")
+    .select("*")
+    .order("seq", { ascending: true })
+    .limit(10_000);
+  if (error) throw new Error(error.message);
+  return (data ?? []).map(fromSampleRow);
 }
