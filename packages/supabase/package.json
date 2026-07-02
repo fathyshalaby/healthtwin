@@ -32,6 +32,11 @@
       "types": "./dist/partnerAuth.d.ts",
       "import": "./dist/partnerAuth.js",
       "require": "./dist/partnerAuth.cjs"
+    },
+    "./webhooks": {
+      "types": "./dist/webhooks.d.ts",
+      "import": "./dist/webhooks.js",
+      "require": "./dist/webhooks.cjs"
     }
   },
   "files": [

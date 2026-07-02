@@ -15,6 +15,10 @@ export async function GET(req: Request) {
     from: params.get("from") ?? undefined,
     to: params.get("to") ?? undefined,
   });
-  const narrative = await templateNarrator().narrate(summary);
+  // Use Claude for the narrative when configured; else the deterministic template.
+  const narrator = process.env.ANTHROPIC_API_KEY
+    ? (await import("@healthtwin/insights/anthropic")).anthropicNarrator()
+    : templateNarrator();
+  const narrative = await narrator.narrate(summary);
   return NextResponse.json({ summary, narrative });
 }
