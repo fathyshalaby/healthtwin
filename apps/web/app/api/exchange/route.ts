@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { verifyPartnerToken } from "@healthtwin/supabase/src/partnerAuth";
+import { verifyPartnerToken } from "@healthtwin/supabase/partnerAuth";
 
 // Partner token → scoped HealthTwin session. Requires PARTNER_JWT_SECRET,
 // SUPABASE_SERVICE_ROLE_KEY, and NEXT_PUBLIC_SUPABASE_URL (server-only secrets).
