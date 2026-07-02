@@ -1,0 +1,9 @@
+{
+  "expo": {
+    "name": "HealthTwin",
+    "slug": "healthtwin",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "platforms": ["ios", "android"]
+  }
+}
