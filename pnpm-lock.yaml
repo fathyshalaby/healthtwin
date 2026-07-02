@@ -54,7 +54,7 @@ importers:
     dependencies:
       '@anthropic-ai/sdk':
         specifier: '>=0.40.0'
-        version: 0.109.1(zod@3.25.76)
+        version: 0.109.1(zod@4.4.3)
       '@healthtwin/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -167,8 +167,8 @@ importers:
         specifier: ^2.3.0
         version: 2.4.0
       zod:
-        specifier: ^3.23.0
-        version: 3.25.76
+        specifier: ^4.4.3
+        version: 4.4.3
     devDependencies:
       tsup:
         specifier: ^8.3.0
@@ -231,7 +231,7 @@ importers:
     devDependencies:
       '@anthropic-ai/sdk':
         specifier: '>=0.40.0'
-        version: 0.109.1(zod@3.25.76)
+        version: 0.109.1(zod@4.4.3)
       tsup:
         specifier: ^8.3.0
         version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)
@@ -350,8 +350,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       zod:
-        specifier: ^3.23.0
-        version: 3.25.76
+        specifier: ^4.4.3
+        version: 4.4.3
     devDependencies:
       tsup:
         specifier: ^8.3.0
@@ -1778,17 +1778,17 @@ packages:
   xmlchars@2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+  zod@4.4.3:
+    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
 
 snapshots:
 
-  '@anthropic-ai/sdk@0.109.1(zod@3.25.76)':
+  '@anthropic-ai/sdk@0.109.1(zod@4.4.3)':
     dependencies:
       json-schema-to-ts: 3.1.1
       standardwebhooks: 1.0.0
     optionalDependencies:
-      zod: 3.25.76
+      zod: 4.4.3
 
   '@asamuzakjp/css-color@3.2.0':
     dependencies:
@@ -2990,4 +2990,4 @@ snapshots:
 
   xmlchars@2.2.0: {}
 
-  zod@3.25.76: {}
+  zod@4.4.3: {}
