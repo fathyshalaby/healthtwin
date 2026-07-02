@@ -11,7 +11,7 @@ describe("createObservation", () => {
     );
     expect(o.id).toMatch(/^[0-9A-HJKMNP-TV-Z]{26}$/);
     expect(o.subjectId).toBe("subj_1");
-    expect(o.taxonomyVersion).toBe("1.0.0");
+    expect(o.taxonomyVersion).toBe("1.1.0");
     expect(o.occurredAt).toBe(o.createdAt); // default
     expect(o.intensity).toBe(6);
   });
