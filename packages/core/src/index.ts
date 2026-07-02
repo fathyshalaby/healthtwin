@@ -5,3 +5,4 @@ export * from "./schema";
 export * from "./log";
 export * from "./query";
 export * from "./store";
+export * from "./sync";
