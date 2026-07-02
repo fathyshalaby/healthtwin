@@ -13,14 +13,15 @@ export interface BodyMapSelection {
 export interface BodyMapProps {
   view: BodyView;
   selectedKey?: RegionKey;
+  /** Review mode: per-region fill colors (e.g. a heatmap). */
+  shading?: Map<RegionKey, string>;
   onSelect: (sel: BodyMapSelection) => void;
 }
 
-export const BodyMap: React.FC<BodyMapProps> = ({ view, selectedKey, onSelect }) => {
+export const BodyMap: React.FC<BodyMapProps> = ({ view, selectedKey, shading, onSelect }) => {
   const shapes = shapesFor(view);
 
   const select = (s: RegionShape, clientX?: number, clientY?: number) => {
-    // Default to region center; refine with client coords when available.
     const point =
       clientX != null && clientY != null
         ? normalizedPoint(s.bbox, clientX, clientY)
@@ -43,7 +44,7 @@ export const BodyMap: React.FC<BodyMapProps> = ({ view, selectedKey, onSelect })
           tabIndex={0}
           aria-label={s.label}
           aria-pressed={selectedKey === s.key}
-          fill={selectedKey === s.key ? "#2563eb" : "#cbd5e1"}
+          fill={selectedKey === s.key ? "#2563eb" : (shading?.get(s.key) ?? "#cbd5e1")}
           stroke="#334155"
           strokeWidth={1}
           style={{ cursor: "pointer" }}
