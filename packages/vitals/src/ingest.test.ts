@@ -15,6 +15,14 @@ describe("fromHealthKit", () => {
     expect(out[0]).toMatchObject({ kind: "heart_rate", unit: "bpm", value: 62, source: "Apple Watch" });
     expect(out[1]).toMatchObject({ kind: "steps", unit: "count", source: "healthkit" });
   });
+
+  it("does NOT map sleep analysis (its value is a stage code, not minutes)", () => {
+    const out = fromHealthKit(
+      [{ type: "HKCategoryTypeIdentifierSleepAnalysis", value: 1, startDate: "2026-07-01T23:00:00.000Z" }],
+      { subjectId: "u1" },
+    );
+    expect(out).toHaveLength(0);
+  });
 });
 
 describe("fromGoogleFit", () => {

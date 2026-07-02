@@ -1,4 +1,4 @@
-import type { Sample } from "./types";
+import { SAMPLE_KINDS, type Sample } from "./types";
 
 /** Postgres row shape for the `samples` table (see migration 0008). */
 export interface SampleRow {
@@ -10,6 +10,7 @@ export interface SampleRow {
   at: string;
   source: string;
   partner_id?: string | null;
+  seq?: number; // server-assigned monotonic sequence (pull cursor)
 }
 
 export function toSampleRow(s: Sample): SampleRow {
@@ -25,10 +26,11 @@ export function toSampleRow(s: Sample): SampleRow {
 }
 
 export function fromSampleRow(r: SampleRow): Sample {
+  const kind = (SAMPLE_KINDS as readonly string[]).includes(r.kind) ? (r.kind as Sample["kind"]) : "other";
   return {
     id: r.id,
     subjectId: r.subject_id,
-    kind: r.kind as Sample["kind"],
+    kind,
     value: r.value,
     unit: r.unit,
     at: new Date(r.at).toISOString(),

@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createCloudAdapter } from "@healthtwin/supabase";
-import { fromSampleRow, type Sample } from "@healthtwin/vitals";
+import { fromSampleRow, type Sample, type SampleRow } from "@healthtwin/vitals";
 import type { Observation } from "@healthtwin/core";
 
 /** Extract the bearer access token from an API request. */
@@ -34,13 +34,25 @@ export async function pullAll(client: SupabaseClient): Promise<Observation[]> {
   return all;
 }
 
-/** Pull every vitals sample the client is allowed to read (RLS-scoped). */
-export async function pullSamples(client: SupabaseClient): Promise<Sample[]> {
-  const { data, error } = await client
-    .from("samples")
-    .select("*")
-    .order("seq", { ascending: true })
-    .limit(10_000);
-  if (error) throw new Error(error.message);
-  return (data ?? []).map(fromSampleRow);
+/**
+ * Pull vitals samples the client is allowed to read (RLS-scoped), paged by the
+ * server-assigned `seq` cursor so nothing is silently truncated. Pass `subjectId`
+ * to scope server-side (avoids fetching other patients' rows for a clinician view).
+ */
+export async function pullSamples(client: SupabaseClient, subjectId?: string): Promise<Sample[]> {
+  const all: Sample[] = [];
+  let from = 0;
+  for (let i = 0; i < 1000; i++) {
+    let q = client.from("samples").select("*").gt("seq", from);
+    if (subjectId) q = q.eq("subject_id", subjectId);
+    const { data, error } = await q.order("seq", { ascending: true }).limit(500);
+    if (error) throw new Error(error.message);
+    const rows = (data ?? []) as SampleRow[];
+    if (rows.length === 0) break;
+    for (const r of rows) all.push(fromSampleRow(r));
+    const lastSeq = rows[rows.length - 1].seq;
+    if (lastSeq == null || rows.length < 500) break;
+    from = lastSeq;
+  }
+  return all;
 }

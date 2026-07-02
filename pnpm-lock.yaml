@@ -327,6 +327,9 @@ importers:
       '@healthtwin/core':
         specifier: workspace:*
         version: link:../core
+      '@healthtwin/vitals':
+        specifier: workspace:*
+        version: link:../vitals
       '@supabase/supabase-js':
         specifier: ^2.45.0
         version: 2.110.0

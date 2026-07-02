@@ -5,3 +5,4 @@ export * from "./query";
 export * from "./ingest";
 export * from "./correlate";
 export * from "./rowMapping";
+export * from "./sync";

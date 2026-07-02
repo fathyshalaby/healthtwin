@@ -93,6 +93,13 @@ create trigger observations_audit_insert
 alter table public.observations
   add column if not exists partner_id text default (auth.jwt() ->> 'partner_id');
 create index if not exists observations_partner on public.observations (partner_id);
+-- Enforce partner_id matches the JWT claim on insert (prevents tenant spoofing).
+drop policy if exists observations_insert_own on public.observations;
+create policy observations_insert_own on public.observations
+  for insert with check (
+    subject_id = auth.uid()
+    and partner_id is not distinct from (auth.jwt() ->> 'partner_id')
+  );
 
 -- ── 0005: note encryption helpers (pgcrypto, opt-in) ─────────────────────────
 create extension if not exists pgcrypto;
@@ -158,7 +165,10 @@ alter table public.samples enable row level security;
 create policy samples_select_own on public.samples
   for select using (subject_id = auth.uid());
 create policy samples_insert_own on public.samples
-  for insert with check (subject_id = auth.uid());
+  for insert with check (
+    subject_id = auth.uid()
+    and partner_id is not distinct from (auth.jwt() ->> 'partner_id')
+  );
 create policy samples_select_granted on public.samples
   for select using (
     exists (
@@ -170,3 +180,27 @@ create policy samples_select_granted on public.samples
         and g.scope = 'all'
     )
   );
+
+-- Audit sample inserts (parity with observations).
+create or replace function public.log_sample_insert() returns trigger as $$
+begin
+  insert into public.audit_log (actor, action, subject_id, record_id)
+  values (auth.uid(), 'sample.insert', new.subject_id, new.id);
+  return new;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists samples_audit_insert on public.samples;
+create trigger samples_audit_insert
+  after insert on public.samples
+  for each row execute function public.log_sample_insert();
+
+-- ── 0009: extend GDPR erasure to samples (redefined now that samples exists) ─
+create or replace function public.purge_subject(target uuid) returns void
+  language sql security definer set search_path = public as $$
+    delete from public.observations where subject_id = target;
+    delete from public.samples where subject_id = target;
+    delete from public.consent_grants where grantor = target or grantee = target;
+    delete from public.audit_log where subject_id = target;
+$$;
+revoke all on function public.purge_subject(uuid) from public, anon, authenticated;

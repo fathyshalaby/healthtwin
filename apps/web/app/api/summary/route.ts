@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { summarize, templateNarrator } from "@healthtwin/insights";
-import { bearer, clientFor, pullAll } from "../../../src/serverSupabase";
+import { correlateSymptomWithMetric, latest } from "@healthtwin/vitals";
+import { bearer, clientFor, pullAll, pullSamples } from "../../../src/serverSupabase";
 import { rateKey, rateLimited } from "../../../src/ratelimit";
 
 // GET /api/summary?subject=<uid> — clinician view of a patient who granted access.
@@ -22,5 +23,32 @@ export async function GET(req: Request) {
   }
   const summary = summarize(observations);
   const narrative = await templateNarrator().narrate(summary);
-  return NextResponse.json({ subject, summary, narrative });
+
+  // Vitals overlay: latest readings + symptom↔metric correlations, ranked by |r|.
+  let vitals:
+    | { latest: Array<{ kind: string; value: number; unit: string; at: string }>; correlations: unknown[] }
+    | undefined;
+  let vitalsError: string | undefined;
+  try {
+    const samples = await pullSamples(client, subject);
+    if (samples.length > 0) {
+      const kinds = [...new Set(samples.map((s) => s.kind))];
+      const correlations = kinds
+        .map((k) => correlateSymptomWithMetric(observations, samples, k))
+        .filter((c) => c.pearson !== null)
+        .sort((a, b) => Math.abs(b.pearson as number) - Math.abs(a.pearson as number));
+      const latestVitals = kinds.map((k) => {
+        const l = latest(samples, k)!;
+        return { kind: k, value: l.value, unit: l.unit, at: l.at };
+      });
+      vitals = { latest: latestVitals, correlations };
+    }
+  } catch (e) {
+    // A missing samples table (pre-migration) is expected → stay silent. Any other
+    // failure is surfaced so a clinician doesn't mistake it for "no vitals recorded".
+    const msg = (e as Error).message ?? "";
+    if (!/does not exist|relation|42P01/i.test(msg)) vitalsError = "vitals temporarily unavailable";
+  }
+
+  return NextResponse.json({ subject, summary, narrative, vitals, vitalsError });
 }

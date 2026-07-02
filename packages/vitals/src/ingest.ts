@@ -14,11 +14,14 @@ export interface HealthKitRecord {
   sourceName?: string;
 }
 
+// Note: sleep is intentionally NOT auto-mapped. HKCategoryTypeIdentifierSleepAnalysis /
+// com.google.sleep.segment carry a sleep-STAGE enum code (not a minutes duration), so
+// naively storing `value` as sleep_minutes yields garbage. Deriving minutes needs the
+// segment's start+end; feed that in as a computed `sleep_minutes` Sample instead.
 const HK_MAP: Record<string, Mapped> = {
   HKQuantityTypeIdentifierHeartRate: { kind: "heart_rate", unit: "bpm" },
   HKQuantityTypeIdentifierStepCount: { kind: "steps", unit: "count" },
   HKQuantityTypeIdentifierActiveEnergyBurned: { kind: "active_energy", unit: "kcal" },
-  HKCategoryTypeIdentifierSleepAnalysis: { kind: "sleep_minutes", unit: "min" },
   HKQuantityTypeIdentifierBodyMass: { kind: "weight", unit: "kg" },
   HKQuantityTypeIdentifierOxygenSaturation: { kind: "spo2", unit: "%" },
   HKQuantityTypeIdentifierBloodPressureSystolic: { kind: "bp_systolic", unit: "mmHg" },
@@ -49,7 +52,6 @@ const GF_MAP: Record<string, Mapped> = {
   "com.google.heart_rate.bpm": { kind: "heart_rate", unit: "bpm" },
   "com.google.step_count.delta": { kind: "steps", unit: "count" },
   "com.google.calories.expended": { kind: "active_energy", unit: "kcal" },
-  "com.google.sleep.segment": { kind: "sleep_minutes", unit: "min" },
   "com.google.weight": { kind: "weight", unit: "kg" },
   "com.google.oxygen_saturation": { kind: "spo2", unit: "%" },
 };

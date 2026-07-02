@@ -6,6 +6,8 @@ import {
 import { bearer, clientFor } from "../../../../src/serverSupabase";
 import { rateKey, rateLimited } from "../../../../src/ratelimit";
 
+const MAX_BATCH = 5000;
+
 // POST /api/vitals/ingest — body: { source?: "healthkit" | "googlefit", records: [...] }.
 // Maps wearable exports into samples and upserts them (RLS scopes to the caller).
 export async function POST(req: Request) {
@@ -28,6 +30,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "invalid json" }, { status: 400 });
   }
   const records = Array.isArray(payload.records) ? payload.records : [];
+  if (records.length > MAX_BATCH) {
+    return NextResponse.json({ error: `too many records (max ${MAX_BATCH} per request)` }, { status: 413 });
+  }
   const ctx = { subjectId: uid };
 
   let samples: Sample[];
@@ -44,7 +49,10 @@ export async function POST(req: Request) {
   const { error } = await client
     .from("samples")
     .upsert(samples.map(toSampleRow), { onConflict: "id", ignoreDuplicates: true });
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("vitals ingest upsert failed:", error.message);
+    return NextResponse.json({ error: "ingest failed" }, { status: 500 });
+  }
 
   return NextResponse.json({ ingested: samples.length });
 }

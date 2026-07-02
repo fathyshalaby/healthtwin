@@ -22,7 +22,10 @@ alter table public.samples enable row level security;
 create policy samples_select_own on public.samples
   for select using (subject_id = auth.uid());
 create policy samples_insert_own on public.samples
-  for insert with check (subject_id = auth.uid());
+  for insert with check (
+    subject_id = auth.uid()
+    and partner_id is not distinct from (auth.jwt() ->> 'partner_id')
+  );
 
 -- Grantees with an 'all'-scope consent grant can read the subject's samples.
 -- (Region-scoped grants don't apply to vitals, so only 'all' shares them.)
@@ -37,3 +40,17 @@ create policy samples_select_granted on public.samples
         and g.scope = 'all'
     )
   );
+
+-- Audit sample inserts (parity with observations_audit_insert).
+create or replace function public.log_sample_insert() returns trigger as $$
+begin
+  insert into public.audit_log (actor, action, subject_id, record_id)
+  values (auth.uid(), 'sample.insert', new.subject_id, new.id);
+  return new;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists samples_audit_insert on public.samples;
+create trigger samples_audit_insert
+  after insert on public.samples
+  for each row execute function public.log_sample_insert();
