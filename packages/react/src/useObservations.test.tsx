@@ -18,6 +18,21 @@ function Harness() {
   );
 }
 
+function Writer() {
+  const { add } = useObservations();
+  return (
+    <button onClick={() => add({ location: { regionId: "chest", side: "central", view: "anterior" }, type: "pain" })}>
+      write
+    </button>
+  );
+}
+
+function Reader() {
+  const { observations, loading } = useObservations();
+  if (loading) return <p>loading</p>;
+  return <p>reader: {observations.length}</p>;
+}
+
 describe("useObservations", () => {
   it("adds an observation and reflects it in the folded set", async () => {
     render(
@@ -28,5 +43,17 @@ describe("useObservations", () => {
     await waitFor(() => screen.getByText("count: 0"));
     await userEvent.click(screen.getByText("add"));
     await waitFor(() => screen.getByText("count: 1"));
+  });
+
+  it("shares state across separate consumers (a write is visible to a different reader)", async () => {
+    render(
+      <HealthTwinProvider store={createMemoryStore()} subjectId="s" origin="d">
+        <Writer />
+        <Reader />
+      </HealthTwinProvider>,
+    );
+    await waitFor(() => screen.getByText("reader: 0"));
+    await userEvent.click(screen.getByText("write"));
+    await waitFor(() => screen.getByText("reader: 1"));
   });
 });
