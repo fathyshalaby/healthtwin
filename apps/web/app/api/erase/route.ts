@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { bearer, clientFor } from "../../../src/serverSupabase";
+import { rateKey, rateLimited } from "../../../src/ratelimit";
 
 // POST /api/erase — GDPR Art. 17 erasure: hard-purge the caller's own data.
 // Uses the service role to run purge_subject (migration 0006) for the authed user only.
 export async function POST(req: Request) {
   const token = bearer(req);
+  const limited = await rateLimited(rateKey(req, token));
+  if (limited) return limited;
   if (!token) return NextResponse.json({ error: "missing bearer token" }, { status: 401 });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

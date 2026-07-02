@@ -12,6 +12,7 @@
   "dependencies": {
     "@healthtwin/core": "workspace:*",
     "@healthtwin/insights": "workspace:*",
+    "@healthtwin/ratelimit": "workspace:*",
     "@healthtwin/react": "workspace:*",
     "@healthtwin/supabase": "workspace:*",
     "@supabase/supabase-js": "^2.45.0",

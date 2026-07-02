@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { summarize, templateNarrator } from "@healthtwin/insights";
 import { bearer, clientFor, pullAll } from "../../../src/serverSupabase";
+import { rateKey, rateLimited } from "../../../src/ratelimit";
 
 // GET /api/insights?from=ISO&to=ISO — processed summary of the caller's own twin.
 export async function GET(req: Request) {
   const token = bearer(req);
+  const limited = await rateLimited(rateKey(req, token));
+  if (limited) return limited;
   if (!token) return NextResponse.json({ error: "missing bearer token" }, { status: 401 });
   const client = clientFor(token);
   if (!client) return NextResponse.json({ error: "cloud not configured" }, { status: 501 });
