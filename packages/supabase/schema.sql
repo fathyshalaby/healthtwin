@@ -102,3 +102,12 @@ create or replace function public.encrypt_note(plain text) returns text
   language sql as $$ select case when plain is null then null else armor(pgp_sym_encrypt(plain, public.note_key())) end $$;
 create or replace function public.decrypt_note(cipher text) returns text
   language sql as $$ select case when cipher is null then null else pgp_sym_decrypt(dearmor(cipher), public.note_key()) end $$;
+
+-- ── 0006: GDPR Art. 17 hard erasure (service-role only) ──────────────────────
+create or replace function public.purge_subject(target uuid) returns void
+  language sql security definer set search_path = public as $$
+    delete from public.observations where subject_id = target;
+    delete from public.consent_grants where grantor = target or grantee = target;
+    delete from public.audit_log where subject_id = target;
+$$;
+revoke all on function public.purge_subject(uuid) from public, anon, authenticated;

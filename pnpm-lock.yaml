@@ -55,6 +55,9 @@ importers:
       '@healthtwin/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@healthtwin/insights':
+        specifier: workspace:*
+        version: link:../../packages/insights
       '@healthtwin/react':
         specifier: workspace:*
         version: link:../../packages/react
