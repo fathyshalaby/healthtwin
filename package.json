@@ -11,5 +11,23 @@
     "turbo": "^2.1.0",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
-  }
+  },
+  "license": "Apache-2.0",
+  "author": "Fathy Shalaby",
+  "description": "Embeddable human digital-twin health-data SDK — body-map symptom capture, local-first sync, review heatmap/timeline, native + partner embed",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fathyshalaby/healthtwin.git"
+  },
+  "homepage": "https://github.com/fathyshalaby/healthtwin#readme",
+  "keywords": [
+    "health",
+    "digital-twin",
+    "sdk",
+    "symptom-tracking",
+    "body-map",
+    "react",
+    "typescript",
+    "supabase"
+  ]
 }
