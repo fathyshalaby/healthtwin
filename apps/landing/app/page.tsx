@@ -44,6 +44,13 @@ const reactLines = [
   "</HealthTwinProvider>",
 ];
 
+const stats = [
+  { label: "Row-level security", icon: "🔒" },
+  { label: "Offline-first architecture", icon: "📡" },
+  { label: "HIPAA/GDPR ready", icon: "✓" },
+  { label: "Zero framework required", icon: "⚡" },
+];
+
 export default function Home() {
   return (
     <>
@@ -148,6 +155,20 @@ export default function Home() {
               <div className="trust-item"><h4>Multi-tenant</h4><p>A spoof-proof <code>partner_id</code> from the session claim keeps each partner's users isolated.</p></div>
               <div className="trust-item"><h4>Encryption helpers</h4><p>pgcrypto helpers for the free-text note, plus encrypted-at-rest storage and TLS in transit.</p></div>
               <div className="trust-item"><h4>Yours to leave with</h4><p>Bring your own backend, or keep data entirely in your system via capture events. Apache-2.0, no lock-in.</p></div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── stats ── */}
+        <section className="section stats-section">
+          <div className="wrap">
+            <div className="stats-grid">
+              {stats.map((s) => (
+                <div key={s.label} className="stat-card">
+                  <div className="stat-icon">{s.icon}</div>
+                  <div className="stat-label">{s.label}</div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
