@@ -7,8 +7,9 @@
 Tap where it hurts. Note what you feel. Build a living, longitudinal record of your body —
 usable as your own app *and* as an SDK that clinics and fitness platforms embed.
 
+[![CI](https://github.com/fathyshalaby/healthtwin/actions/workflows/ci.yml/badge.svg)](https://github.com/fathyshalaby/healthtwin/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-![Tests](https://img.shields.io/badge/tests-49%20unit%20%2B%202%20e2e-brightgreen)
+![Tests](https://img.shields.io/badge/tests-60%20unit%20%2B%204%20e2e-brightgreen)
 ![Status](https://img.shields.io/badge/status-alpha-orange)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
 ![pnpm](https://img.shields.io/badge/monorepo-pnpm%20%2B%20Turborepo-f69220)
@@ -24,11 +25,11 @@ as a **persistent record** that accumulates over time — so a physiotherapist, 
 person themselves can look back and see *what actually happened this week*: where it hurt, how
 intensely, when, and in what context ("sore after PT," "worse in the mornings").
 
-- 🧍 **Body-map capture** — tap a region on a 2D anatomical map, log type · quality · 0–10 intensity · note · time · context.
-- 🔥 **Review** — a **heatmap** (by frequency / mean intensity / recency) and a day-grouped **timeline**.
+- 🧍 **Body-map capture** — tap a region (front **or** back) on a 2D anatomical map; log type · quality · 0–10 intensity · note · time · context; **edit or delete** any entry (immutable supersede/tombstone).
+- 🔥 **Review** — a **heatmap** (frequency / mean intensity / recency) over a **date window**, plus a day-grouped **timeline** you can filter by tapping a region.
 - 📴 **Local-first** — capture works offline; syncs through a pluggable backend when online.
-- 🔒 **Security-first** — encrypted-at-rest + Postgres Row-Level Security, consent-based sharing, audit log.
-- 🧩 **Embeddable** — drop `<health-twin-capture>` into any partner app; keep the data in *their* backend if they want.
+- 🔒 **Security-first** — Postgres Row-Level Security, **consent-based sharing** (scoped/time-boxed/revocable), `partner_id` multi-tenancy from a spoof-proof JWT claim, audit log, and opt-in `pgcrypto` note encryption.
+- 🧩 **Embeddable** — drop `<health-twin-capture>` into any partner app (origin-pinned events); keep the data in *their* backend if they want.
 - 📱 **Web + native** — one shared body-map geometry renders on the web (SVG) and native (react-native-svg).
 
 ## Quickstart
@@ -174,8 +175,13 @@ Built and tested in five phases:
 | 4 | Native (Expo) data layer + scaffold | ✅ *(needs a simulator to run)* |
 | 5 | Partner embed (web component) | ✅ |
 
-> ⚠️ Body-map regions are **placeholder rectangles** — swap in licensed anatomical SVG art
-> before shipping to real users. See `WHATS-MISSING.md` for the full gap list.
+A **hardening pass** followed: front/back capture, edit/delete, date-windowed review,
+consent-grant API + share UI, `partner_id` multi-tenancy + a partner token-exchange route,
+opt-in note encryption, an env-gated RLS-denial test, real `tsup` package builds
+(ESM+CJS+`.d.ts`, publishable), a self-contained embed bundle, and CI.
+
+> ⚠️ Body-map regions are still **placeholder rectangles** — swap in licensed anatomical SVG
+> art before shipping to real users. See [`WHATS-MISSING.md`](WHATS-MISSING.md) for the current gap list.
 
 ## Testing
 
