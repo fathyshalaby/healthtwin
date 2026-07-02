@@ -88,3 +88,8 @@ drop trigger if exists observations_audit_insert on public.observations;
 create trigger observations_audit_insert
   after insert on public.observations
   for each row execute function public.log_observation_insert();
+
+-- ── 0004: partner (tenant) tagging ───────────────────────────────────────────
+alter table public.observations
+  add column if not exists partner_id text default (auth.jwt() ->> 'partner_id');
+create index if not exists observations_partner on public.observations (partner_id);
