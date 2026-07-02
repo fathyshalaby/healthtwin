@@ -26,6 +26,12 @@ importers:
       '@healthtwin/react':
         specifier: workspace:*
         version: link:../../packages/react
+      '@healthtwin/supabase':
+        specifier: workspace:*
+        version: link:../../packages/supabase
+      '@supabase/supabase-js':
+        specifier: ^2.45.0
+        version: 2.110.0
       next:
         specifier: ^15.0.0
         version: 15.5.20(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)

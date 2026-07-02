@@ -5,7 +5,7 @@ import { HealthTwinContext } from "./HealthTwinProvider";
 export function useObservations() {
   const ctx = React.useContext(HealthTwinContext);
   if (!ctx) throw new Error("useObservations must be used within HealthTwinProvider");
-  const { all, loading, add } = ctx;
+  const { all, loading, syncing, add, sync } = ctx;
 
   const observations = React.useMemo(() => foldLog(all), [all]);
   const query = React.useCallback(
@@ -13,5 +13,5 @@ export function useObservations() {
     [observations],
   );
 
-  return { observations, add, query, loading };
+  return { observations, add, query, loading, sync, syncing };
 }
