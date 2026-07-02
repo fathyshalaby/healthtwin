@@ -30,12 +30,14 @@ export class HealthTwinCaptureElement extends HTMLElement {
     const view = (this.getAttribute("view") as BodyView) || "anterior";
     const subjectId = this.getAttribute("subject-id") || "embed-anon";
 
+    // Never broadcast PHI to "*": require an explicit target origin (default same-origin).
+    const targetOrigin = this.getAttribute("allowed-origin") || window.location.origin;
     const emit = (o: Observation) => {
       this.dispatchEvent(new CustomEvent("healthtwin:observation", { detail: o, bubbles: true, composed: true }));
       try {
-        window.parent?.postMessage({ type: "healthtwin:observation", observation: o }, "*");
+        window.parent?.postMessage({ type: "healthtwin:observation", observation: o }, targetOrigin);
       } catch {
-        /* cross-origin parent may reject; ignore */
+        /* target-origin mismatch or cross-origin parent; ignore */
       }
     };
 

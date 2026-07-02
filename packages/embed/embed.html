@@ -6,19 +6,20 @@
     <title>HealthTwin Embed</title>
   </head>
   <body style="margin: 0">
-    <!-- Build the embed to a single bundle (e.g. tsup/vite) that calls
-         defineHealthTwinCapture(), then reference it here: -->
+    <!-- Build the embed to a single bundle (see build.mjs → embed.bundle.js) that
+         calls defineHealthTwinCapture(), then reference it here: -->
     <script type="module" src="./embed.bundle.js"></script>
 
-    <health-twin-capture view="anterior"></health-twin-capture>
+    <!-- Set allowed-origin to the HOST page's origin so PHI is never posted to "*". -->
+    <health-twin-capture view="anterior" allowed-origin="https://partner.example"></health-twin-capture>
 
-    <script type="module">
-      // Relay captured observations to the hosting (parent) frame.
-      document
-        .querySelector("health-twin-capture")
-        .addEventListener("healthtwin:observation", (e) =>
-          parent.postMessage({ type: "healthtwin:observation", observation: e.detail }, "*"),
-        );
-    </script>
+    <!--
+      On the HOST page, always verify event.origin before trusting a message:
+
+      window.addEventListener("message", (e) => {
+        if (e.origin !== "https://embed.healthtwin.dev") return;   // pin the embed origin
+        if (e.data?.type === "healthtwin:observation") persist(e.data.observation);
+      });
+    -->
   </body>
 </html>
