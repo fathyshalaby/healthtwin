@@ -1,7 +1,7 @@
 -- Consent grants: explicit, scoped, time-boxed, revocable sharing.
 create table if not exists public.consent_grants (
   id          uuid primary key default gen_random_uuid(),
-  grantor     uuid not null,                 -- the subject sharing their data
+  grantor     uuid not null default auth.uid(),                 -- the subject sharing their data
   grantee     uuid not null,                 -- who may read it (e.g. a clinician)
   scope       text not null default 'all',   -- 'all' or a specific regionId
   expires_at  timestamptz,                   -- null = no expiry

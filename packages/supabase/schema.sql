@@ -33,7 +33,7 @@ create policy observations_insert_own on public.observations
 -- ── 0002: consent grants (scoped, time-boxed, revocable sharing) ─────────────
 create table if not exists public.consent_grants (
   id          uuid primary key default gen_random_uuid(),
-  grantor     uuid not null,
+  grantor     uuid not null default auth.uid(),
   grantee     uuid not null,
   scope       text not null default 'all',
   expires_at  timestamptz,
