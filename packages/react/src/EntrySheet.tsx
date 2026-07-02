@@ -7,6 +7,7 @@ export interface EntrySheetProps {
   side: Side;
   view: BodyView;
   point?: { x: number; y: number };
+  initial?: Partial<NewObservation>;   // prefill (for editing)
   onSubmit: (input: NewObservation) => void;
   onCancel: () => void;
 }
@@ -14,21 +15,22 @@ export interface EntrySheetProps {
 const TYPES: ObservationType[] = ["pain", "stiffness", "numbness", "tingling", "swelling", "weakness", "other"];
 const QUALITIES: Quality[] = ["sharp", "dull", "burning", "throbbing", "aching", "stabbing", "cramping"];
 
-// Format a Date as the value for <input type="datetime-local"> (local time, minute precision).
 function toLocalInputValue(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 export const EntrySheet: React.FC<EntrySheetProps> = ({
-  regionId, regionLabel, side, view, point, onSubmit, onCancel,
+  regionId, regionLabel, side, view, point, initial, onSubmit, onCancel,
 }) => {
-  const [type, setType] = React.useState<ObservationType>("pain");
-  const [quality, setQuality] = React.useState<Quality[]>([]);
-  const [intensity, setIntensity] = React.useState(5);
-  const [note, setNote] = React.useState("");
-  const [tags, setTags] = React.useState("");
-  const [occurredLocal, setOccurredLocal] = React.useState(() => toLocalInputValue(new Date()));
+  const [type, setType] = React.useState<ObservationType>(initial?.type ?? "pain");
+  const [quality, setQuality] = React.useState<Quality[]>(initial?.quality ?? []);
+  const [intensity, setIntensity] = React.useState(initial?.intensity ?? 5);
+  const [note, setNote] = React.useState(initial?.note ?? "");
+  const [tags, setTags] = React.useState((initial?.contextTags ?? []).join(", "));
+  const [occurredLocal, setOccurredLocal] = React.useState(() =>
+    toLocalInputValue(initial?.occurredAt ? new Date(initial.occurredAt) : new Date()),
+  );
 
   const toggle = (q: Quality) =>
     setQuality((cur) => (cur.includes(q) ? cur.filter((x) => x !== q) : [...cur, q]));

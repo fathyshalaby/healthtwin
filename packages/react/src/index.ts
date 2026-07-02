@@ -3,6 +3,8 @@ export * from "./idbSyncMeta";
 export * from "./HealthTwinProvider";
 export * from "./useObservations";
 export * from "./EntrySheet";
+export * from "./ViewToggle";
 export * from "./BodyMapCapture";
 export * from "./BodyMapReview";
+export * from "./ReviewPanel";
 export * from "./Timeline";

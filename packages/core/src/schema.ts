@@ -63,3 +63,30 @@ export function createObservation(input: NewObservation, ctx: ObservationContext
   };
   return ObservationSchema.parse(candidate) as Observation;
 }
+
+/** An edit: a new record superseding `prev`, with `patch` applied over its fields. */
+export function editObservation(
+  prev: Observation,
+  patch: Partial<NewObservation>,
+  ctx: ObservationContext,
+): Observation {
+  const next = createObservation(
+    {
+      location: patch.location ?? prev.location,
+      type: patch.type ?? prev.type,
+      quality: patch.quality ?? prev.quality,
+      intensity: patch.intensity ?? prev.intensity,
+      note: patch.note ?? prev.note,
+      contextTags: patch.contextTags ?? prev.contextTags,
+      occurredAt: patch.occurredAt ?? prev.occurredAt,
+    },
+    ctx,
+  );
+  return { ...next, subjectId: prev.subjectId, supersedes: prev.id };
+}
+
+/** A delete: a tombstone record superseding `prev`. `foldLog` drops the whole chain. */
+export function tombstoneObservation(prev: Observation, ctx: ObservationContext): Observation {
+  const next = createObservation({ location: prev.location, type: prev.type }, ctx);
+  return { ...next, subjectId: prev.subjectId, supersedes: prev.id, tombstone: true };
+}

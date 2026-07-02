@@ -1,10 +1,10 @@
 import * as React from "react";
-import { buildTimeline, getRegion } from "@healthtwin/core";
+import { buildTimeline, getRegion, type ObservationFilter } from "@healthtwin/core";
 import { useObservations } from "./useObservations";
 
-export const Timeline: React.FC = () => {
+export const Timeline: React.FC<{ filter?: ObservationFilter }> = ({ filter }) => {
   const { observations } = useObservations();
-  const days = React.useMemo(() => buildTimeline(observations), [observations]);
+  const days = React.useMemo(() => buildTimeline(observations, filter), [observations, filter]);
 
   return (
     <section aria-label="Timeline">

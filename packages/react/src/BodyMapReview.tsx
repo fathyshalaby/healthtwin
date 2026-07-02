@@ -6,15 +6,22 @@ import { useObservations } from "./useObservations";
 
 const METRICS: HeatmapMetric[] = ["frequency", "meanIntensity", "recency"];
 
-export interface BodyMapReviewProps { view?: BodyView; }
+export interface BodyMapReviewProps {
+  view?: BodyView;
+  from?: string;
+  selectedRegionId?: string | null;
+  onRegionSelect?: (regionId: string | null) => void;
+}
 
-export const BodyMapReview: React.FC<BodyMapReviewProps> = ({ view = "anterior" }) => {
+export const BodyMapReview: React.FC<BodyMapReviewProps> = ({
+  view = "anterior", from, selectedRegionId, onRegionSelect,
+}) => {
   const { observations } = useObservations();
   const [metric, setMetric] = React.useState<HeatmapMetric>("frequency");
 
   const shading = React.useMemo(
-    () => shadingFor(computeHeatmap(observations, { metric })),
-    [observations, metric],
+    () => shadingFor(computeHeatmap(observations, { metric, from })),
+    [observations, metric, from],
   );
 
   return (
@@ -22,18 +29,15 @@ export const BodyMapReview: React.FC<BodyMapReviewProps> = ({ view = "anterior" 
       <div role="radiogroup" aria-label="Heatmap metric">
         {METRICS.map((m) => (
           <label key={m}>
-            <input
-              type="radio"
-              name="ht-metric"
-              aria-label={m}
-              checked={metric === m}
-              onChange={() => setMetric(m)}
-            />{" "}
-            {m}
+            <input type="radio" name="ht-metric" aria-label={m} checked={metric === m} onChange={() => setMetric(m)} /> {m}
           </label>
         ))}
       </div>
-      <BodyMap view={view} shading={shading} onSelect={() => {}} />
+      <BodyMap
+        view={view}
+        shading={shading}
+        onSelect={(s) => onRegionSelect?.(selectedRegionId === s.regionId ? null : s.regionId)}
+      />
       <p aria-label="legend">Cooler = less · warmer = more</p>
     </div>
   );
