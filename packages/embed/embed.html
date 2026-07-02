@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HealthTwin Embed</title>
+  </head>
+  <body style="margin: 0">
+    <!-- Build the embed to a single bundle (e.g. tsup/vite) that calls
+         defineHealthTwinCapture(), then reference it here: -->
+    <script type="module" src="./embed.bundle.js"></script>
+
+    <health-twin-capture view="anterior"></health-twin-capture>
+
+    <script type="module">
+      // Relay captured observations to the hosting (parent) frame.
+      document
+        .querySelector("health-twin-capture")
+        .addEventListener("healthtwin:observation", (e) =>
+          parent.postMessage({ type: "healthtwin:observation", observation: e.detail }, "*"),
+        );
+    </script>
+  </body>
+</html>
