@@ -93,3 +93,12 @@ create trigger observations_audit_insert
 alter table public.observations
   add column if not exists partner_id text default (auth.jwt() ->> 'partner_id');
 create index if not exists observations_partner on public.observations (partner_id);
+
+-- ── 0005: note encryption helpers (pgcrypto, opt-in) ─────────────────────────
+create extension if not exists pgcrypto;
+create or replace function public.note_key() returns text
+  language sql stable as $$ select current_setting('app.note_key', true) $$;
+create or replace function public.encrypt_note(plain text) returns text
+  language sql as $$ select case when plain is null then null else armor(pgp_sym_encrypt(plain, public.note_key())) end $$;
+create or replace function public.decrypt_note(cipher text) returns text
+  language sql as $$ select case when cipher is null then null else pgp_sym_decrypt(dearmor(cipher), public.note_key()) end $$;

@@ -8,7 +8,7 @@ create table if not exists public.observations (
   type            text not null,
   quality         text[],
   intensity       int check (intensity between 0 and 10),
-  note            text,                               -- TODO: column-encrypt via pgcrypto (see README)
+  note            text,                               -- Art. 9 free-text; encryption helpers in 0005
   context_tags    text[],
   taxonomy_version text not null,
   supersedes      text,

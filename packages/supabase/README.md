@@ -37,8 +37,24 @@ supabase db push         # applies migrations/*.sql
 Then provide the client with `SUPABASE_URL` + anon key and pass `createCloudAdapter(client)`
 as the sync adapter.
 
-## Follow-ups (not in this phase)
+## Partner multi-tenancy
 
-- Column-encrypt `note` with `pgcrypto` (or app-layer envelope encryption).
+`partner_id` (migration `0004`) is derived from the session JWT claim, so a client can't
+spoof it. Bridge a partner's user with `signPartnerToken`/`verifyPartnerToken`
+(`src/partnerAuth.ts`, server-only) and the `/api/exchange` route in `apps/web`.
+
+## Note encryption
+
+Migration `0005` installs `pgcrypto` + `encrypt_note`/`decrypt_note` helpers keyed by a
+server-held secret (`app.note_key`). Transparent encryption is **opt-in** (wire a trigger +
+decrypting read path) so it doesn't silently break reads — see the migration header.
+
+## Verifying the security boundary
+
+`src/rls.test.ts` is an env-gated two-user test asserting cross-user reads are denied. Run
+it against a live project (or local Supabase) with two seeded users.
+
+## Follow-ups
+
 - Enable `pgaudit` for read-auditing (Postgres has no read triggers).
-- Partner multi-tenancy: add `partner_id` scoping + a partner-token → session exchange.
+- Hard-purge job for GDPR erasure (append-only tombstones don't remove plaintext).
