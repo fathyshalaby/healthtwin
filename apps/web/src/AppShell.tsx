@@ -7,6 +7,7 @@ const TABS = [
   { href: "/", label: "Capture" },
   { href: "/review", label: "Review" },
   { href: "/insights", label: "Insights" },
+  { href: "/partner", label: "Partner" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
