@@ -58,6 +58,9 @@ importers:
       '@healthtwin/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@healthtwin/embed':
+        specifier: workspace:*
+        version: link:../../packages/embed
       '@healthtwin/insights':
         specifier: workspace:*
         version: link:../../packages/insights

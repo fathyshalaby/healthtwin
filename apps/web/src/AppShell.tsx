@@ -8,6 +8,7 @@ const TABS = [
   { href: "/review", label: "Review" },
   { href: "/insights", label: "Insights" },
   { href: "/partner", label: "Partner" },
+  { href: "/embed", label: "Embed" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {

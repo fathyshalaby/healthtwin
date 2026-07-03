@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@healthtwin/core": "workspace:*",
+    "@healthtwin/embed": "workspace:*",
     "@healthtwin/insights": "workspace:*",
     "@healthtwin/ratelimit": "workspace:*",
     "@healthtwin/react": "workspace:*",
