@@ -13,9 +13,15 @@ export const metadata = {
   description: "Tap where it hurts, log how it feels, and see the pattern.",
 };
 
+// Set the theme before first paint so there's no flash of the wrong theme.
+const THEME_INIT = `(function(){try{var t=localStorage.getItem('ht-theme')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
+      </head>
       <body>
         <AppShell>
           <Providers>{children}</Providers>

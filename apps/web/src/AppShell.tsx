@@ -2,6 +2,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ThemeToggle } from "./ThemeToggle";
 
 const TABS = [
   { href: "/", label: "Capture" },
@@ -18,7 +19,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <header className="app-bar">
         <div className="app-bar-inner">
           <span className="brand"><span className="brand-mark" aria-hidden /> HealthTwin</span>
-          <span className="app-status">LOCAL</span>
+          <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span className="app-status">LOCAL</span>
+            <ThemeToggle />
+          </span>
         </div>
         <nav className="seg-nav" aria-label="Sections">
           {TABS.map((t) => {
