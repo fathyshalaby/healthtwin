@@ -13,6 +13,7 @@
     "@healthtwin/core": "workspace:*",
     "@healthtwin/bodymap-core": "workspace:*",
     "@healthtwin/bodymap-react": "workspace:*",
+    "@healthtwin/vitals": "workspace:*",
     "idb": "^8.0.0"
   },
   "peerDependencies": {

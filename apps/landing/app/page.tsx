@@ -20,6 +20,30 @@ function Code({ title, lines }: { title: string; lines: string[] }) {
   );
 }
 
+function SignalPlot() {
+  const sleep = [7.5, 7, 5.5, 5, 6, 4.5, 7]; // hours
+  const sym = [2, 3, 6, 7, 5, 8, 3]; // 0–10 intensity
+  const W = 300, H = 152, padX = 16, padY = 18;
+  const x = (i: number) => padX + (i * (W - padX * 2)) / (sleep.length - 1);
+  const ySleep = (v: number) => padY + (1 - (v - 4) / 4) * (H - padY * 2); // 4..8h
+  const ySym = (v: number) => padY + (1 - v / 10) * (H - padY * 2); // 0..10
+  const line = (arr: number[], y: (v: number) => number) =>
+    arr.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const gy = (f: number) => padY + f * (H - padY * 2);
+  return (
+    <svg className="signal-plot" viewBox={`0 0 ${W} ${H}`} role="img"
+      aria-label="Symptom intensity rises on the days sleep drops — a strong inverse correlation.">
+      {[0.25, 0.5, 0.75].map((f) => (
+        <line key={f} className="sg-grid" x1={padX} x2={W - padX} y1={gy(f)} y2={gy(f)} />
+      ))}
+      <polyline className="sg-sleep" points={line(sleep, ySleep)} />
+      <polyline className="sg-sym" points={line(sym, ySym)} />
+      {sleep.map((v, i) => <circle key={`s${i}`} className="d-sleep" cx={x(i)} cy={ySleep(v)} r={2.6} />)}
+      {sym.map((v, i) => <circle key={`y${i}`} className="d-sym" cx={x(i)} cy={ySym(v)} r={2.6} />)}
+    </svg>
+  );
+}
+
 const webLines = [
   "// no framework required",
   "import { defineHealthTwinCapture }",
@@ -59,6 +83,7 @@ export default function Home() {
           <span className="brand"><span className="brand-mark" /> HealthTwin</span>
           <nav className="nav-links">
             <a href="#loop">How it works</a>
+            <a href="#signal">Signal</a>
             <a href="#trust">Security</a>
             <a href={`${GH}#readme`}>Docs</a>
             <a className="btn btn-primary" href={GH}>Get the SDK →</a>
@@ -140,11 +165,41 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ── signal ── */}
+        <section className="section" id="signal">
+          <div className="wrap">
+            <div className="section-head">
+              <span className="eyebrow">FIG.04 — Signal</span>
+              <h2>Then read the signal the body&apos;s been sending.</h2>
+              <p>Connect wearable and workout data, and HealthTwin lines it up against the symptom log — so &ldquo;my knee flares&rdquo; becomes &ldquo;flares track your worst-sleep nights.&rdquo; An AI narrative and tenant-scoped analytics come with it.</p>
+            </div>
+            <div className="signal-grid">
+              <div className="plate-panel">
+                <div className="plate-panel-head"><span>Knee pain × sleep · this week</span><b>r = −0.82</b></div>
+                <SignalPlot />
+                <div className="signal-legend">
+                  <span><span className="dot" style={{ background: "var(--heat)" }} /> Symptom</span>
+                  <span><span className="dot" style={{ background: "var(--cool)" }} /> Sleep hours</span>
+                </div>
+                <ol className="readout">
+                  <li><span className="rk-n">↓</span> Nights under 6h → a next-day flare <span className="rk-m">4 of 5 times</span></li>
+                  <li><span className="rk-n">AI</span> <span className="rk-m">&ldquo;Knee pain tracked closely with short sleep this week.&rdquo;</span></li>
+                </ol>
+              </div>
+              <div className="signal-points">
+                <div className="sig-point"><h4>Wearable ingestion</h4><p>HealthKit and Google Fit map straight into the record — heart rate, steps, energy, weight — a vitals stream beside the symptoms, offline-synced like everything else.</p></div>
+                <div className="sig-point"><h4>AI clinical narrative</h4><p>An opt-in Claude summary turns the week into two factual, no-diagnosis sentences a clinician can skim — or a deterministic version with no model at all.</p></div>
+                <div className="sig-point"><h4>Analytics &amp; webhooks</h4><p>Tenant-scoped cohort metrics for partners, plus HMAC-signed webhooks that push every new observation to your backend.</p></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ── trust ── */}
         <section className="section" id="trust">
           <div className="wrap">
             <div className="section-head">
-              <span className="eyebrow">FIG.04 — Trust</span>
+              <span className="eyebrow">FIG.05 — Trust</span>
               <h2>Built for health data from the first commit.</h2>
               <p>Security isn't a later phase. It's the data model.</p>
             </div>
@@ -177,7 +232,7 @@ export default function Home() {
         <section className="section">
           <div className="wrap">
             <div className="section-head">
-              <span className="eyebrow">FIG.05 — Who it's for</span>
+              <span className="eyebrow">FIG.06 — Who it's for</span>
               <h2>For the platforms people bring their bodies to.</h2>
             </div>
             <div className="aud">
@@ -199,7 +254,7 @@ export default function Home() {
       {/* ── cta ── */}
       <section className="cta">
         <div className="cta-inner">
-          <span className="eyebrow">FIG.06 — Ship it</span>
+          <span className="eyebrow">FIG.07 — Ship it</span>
           <h2>Give your users a body they can annotate.</h2>
           <div className="cta-actions">
             <a className="btn btn-primary" href={GH}>Get the SDK →</a>

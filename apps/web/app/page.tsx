@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <main style={{ maxWidth: 480, margin: "0 auto", padding: 16 }}>
       <h1>HealthTwin</h1>
-      <nav><Link href="/review">Review →</Link></nav>
+      <nav><Link href="/review">Review →</Link> <Link href="/insights">Insights →</Link></nav>
       <BodyMapCapture view="anterior" />
       <EntriesList />
     </main>
