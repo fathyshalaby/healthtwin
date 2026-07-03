@@ -71,6 +71,18 @@ a { color: inherit; text-decoration: none; }
 .hero-meta { margin-top: 22px; font-family: var(--font-mono), monospace; font-size: 12.5px; color: var(--muted); letter-spacing: .04em; }
 .hero-meta b { color: var(--ink); font-weight: 600; }
 
+/* orchestrated hero reveal on load */
+@keyframes heroRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+.hero .eyebrow, .hero h1, .hero-sub, .hero-cta, .hero-meta, .plate-panel { animation: heroRise .7s cubic-bezier(.2, .7, .2, 1) both; }
+.hero h1 { animation-delay: .06s; }
+.hero-sub { animation-delay: .14s; }
+.hero-cta { animation-delay: .22s; }
+.hero-meta { animation-delay: .3s; }
+.plate-panel { animation-delay: .18s; }
+@media (prefers-reduced-motion: reduce) {
+  .hero .eyebrow, .hero h1, .hero-sub, .hero-cta, .hero-meta, .plate-panel { animation: none; }
+}
+
 /* body plate */
 .plate-panel { position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: 20px; padding: 24px; box-shadow: 0 20px 40px -20px rgba(12, 26, 43, .25), 0 0 1px rgba(12, 26, 43, .1); transition: all .3s ease; }
 .plate-panel:hover { box-shadow: 0 30px 60px -20px rgba(12, 26, 43, .35), 0 0 1px rgba(37, 99, 235, .2); }

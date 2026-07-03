@@ -1,6 +1,7 @@
 import { BodyPlate } from "../src/BodyPlate";
 
 const GH = "https://github.com/fathyshalaby/healthtwin";
+const APP = process.env.NEXT_PUBLIC_APP_URL || GH; // set NEXT_PUBLIC_APP_URL to the deployed app
 
 function Code({ title, lines }: { title: string; lines: string[] }) {
   return (
@@ -70,9 +71,9 @@ const reactLines = [
 
 const stats = [
   { label: "Row-level security", icon: "🔒" },
-  { label: "Offline-first architecture", icon: "📡" },
-  { label: "HIPAA/GDPR ready", icon: "✓" },
-  { label: "Zero framework required", icon: "⚡" },
+  { label: "AI clinical narratives", icon: "🧠" },
+  { label: "Wearable-aware vitals", icon: "⌚" },
+  { label: "Web · Native · Embed", icon: "🧩" },
 ];
 
 export default function Home() {
@@ -104,7 +105,7 @@ export default function Home() {
               </p>
               <div className="hero-cta">
                 <a className="btn btn-primary" href={GH}>Get the SDK →</a>
-                <a className="btn btn-ghost" href={`${GH}#readme`}>Read the docs</a>
+                <a className="btn btn-ghost" href={APP}>See the live demo →</a>
               </div>
               <p className="hero-meta">
                 <b>Apache-2.0</b> · local-first · web + native · <b>HIPAA / GDPR-aware</b>
