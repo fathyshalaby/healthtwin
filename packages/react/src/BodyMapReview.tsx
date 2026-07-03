@@ -5,6 +5,11 @@ import { computeHeatmap, type HeatmapMetric, type BodyView } from "@healthtwin/c
 import { useObservations } from "./useObservations";
 
 const METRICS: HeatmapMetric[] = ["frequency", "meanIntensity", "recency"];
+const METRIC_LABELS: Record<HeatmapMetric, string> = {
+  frequency: "Frequency",
+  meanIntensity: "Mean intensity",
+  recency: "Recency",
+};
 
 export interface BodyMapReviewProps {
   view?: BodyView;
@@ -29,7 +34,7 @@ export const BodyMapReview: React.FC<BodyMapReviewProps> = ({
       <div role="radiogroup" aria-label="Heatmap metric">
         {METRICS.map((m) => (
           <label key={m}>
-            <input type="radio" name="ht-metric" aria-label={m} checked={metric === m} onChange={() => setMetric(m)} /> {m}
+            <input type="radio" name="ht-metric" aria-label={m} checked={metric === m} onChange={() => setMetric(m)} /> {METRIC_LABELS[m]}
           </label>
         ))}
       </div>

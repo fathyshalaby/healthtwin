@@ -11,3 +11,4 @@ export * from "./BodyMapCapture";
 export * from "./BodyMapReview";
 export * from "./ReviewPanel";
 export * from "./Timeline";
+export * from "@healthtwin/bodymap-react";

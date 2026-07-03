@@ -30,7 +30,7 @@ export function CorrelationView({ observations, samples, kind }: CorrelationView
   const label = kind.replace(/_/g, " ");
 
   if (c.pearson == null) {
-    return <p role="status">Not enough overlapping days yet to correlate symptoms with {label}.</p>;
+    return <p role="status" className="corr-verdict">Not enough overlapping days yet to correlate symptoms with {label}.</p>;
   }
 
   const r = c.pearson;
@@ -47,19 +47,19 @@ export function CorrelationView({ observations, samples, kind }: CorrelationView
   const poly = (ys: number[]) => c.points.map((_, i) => `${xAt(i).toFixed(1)},${ys[i].toFixed(1)}`).join(" ");
 
   return (
-    <div>
-      <p>
+    <div className="corr">
+      <p className="corr-verdict">
         <strong>{strength} {direction} correlation</strong> (r = {r.toFixed(2)}) between symptom
         intensity and {label} over {c.n} day{c.n === 1 ? "" : "s"}.
       </p>
-      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} role="img"
+      <svg className="corr-plot" viewBox={`0 0 ${W} ${H}`} width="100%" height={H} role="img"
         aria-label={`${strength} ${direction} correlation, r ${r.toFixed(2)}, over ${c.n} days`}>
         <polyline points={poly(symY)} fill="none" stroke={SYM} strokeWidth={2} strokeLinejoin="round" />
         <polyline points={poly(metY)} fill="none" stroke={MET} strokeWidth={2} strokeLinejoin="round" />
       </svg>
-      <p style={{ fontSize: 12, color: "#54677a", margin: "4px 0 0" }}>
-        <span style={{ color: SYM }}>■</span> symptom intensity{"    "}
-        <span style={{ color: MET }}>■</span> {label}
+      <p className="corr-legend">
+        <span><span className="sw" style={{ background: SYM }} /> symptom intensity</span>
+        <span><span className="sw" style={{ background: MET }} /> {label}</span>
       </p>
     </div>
   );

@@ -1,14 +1,18 @@
 "use client";
 import * as React from "react";
-import Link from "next/link";
 import { ReviewPanel } from "@healthtwin/react";
 
 export default function Review() {
   return (
-    <main style={{ maxWidth: 480, margin: "0 auto", padding: 16 }}>
-      <h1>Review</h1>
-      <nav><Link href="/">← Capture</Link></nav>
-      <ReviewPanel initialView="anterior" />
-    </main>
+    <>
+      <div className="page-head">
+        <span className="eyebrow">Review</span>
+        <h1>See the pattern</h1>
+        <p className="lede">A heat map and a timeline — what happened this week versus last month.</p>
+      </div>
+      <div className="plate">
+        <ReviewPanel initialView="anterior" />
+      </div>
+    </>
   );
 }

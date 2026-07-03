@@ -1,16 +1,18 @@
 "use client";
 import * as React from "react";
-import Link from "next/link";
-import { BodyMapCapture } from "@healthtwin/react";
+import { CaptureBoard } from "../src/CaptureBoard";
 import { EntriesList } from "../src/EntriesList";
 
 export default function Home() {
   return (
-    <main style={{ maxWidth: 480, margin: "0 auto", padding: 16 }}>
-      <h1>HealthTwin</h1>
-      <nav><Link href="/review">Review →</Link> <Link href="/insights">Insights →</Link></nav>
-      <BodyMapCapture view="anterior" />
+    <>
+      <div className="page-head">
+        <span className="eyebrow">Capture</span>
+        <h1>Tap where it hurts</h1>
+        <p className="lede">Log how it feels — it becomes a longitudinal record you and your clinician can read.</p>
+      </div>
+      <CaptureBoard />
       <EntriesList />
-    </main>
+    </>
   );
 }

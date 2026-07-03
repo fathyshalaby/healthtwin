@@ -1,6 +1,5 @@
 "use client";
 import * as React from "react";
-import Link from "next/link";
 import { useObservations, useVitals, createIdbSampleStore, CorrelationView } from "@healthtwin/react";
 import { summarize, templateNarrator } from "@healthtwin/insights";
 import { latest } from "@healthtwin/vitals";
@@ -48,23 +47,21 @@ export default function InsightsPage() {
   };
 
   return (
-    <main>
-      <h1>Insights</h1>
-      <nav>
-        <Link href="/">← Capture</Link>
-        <Link href="/review">Review</Link>
-      </nav>
+    <>
+      <div className="page-head">
+        <span className="eyebrow">Insights</span>
+        <h1>What moves the needle</h1>
+        <p className="lede">
+          The same engine that powers the cloud API — <code>@healthtwin/insights</code> +{" "}
+          <code>@healthtwin/vitals</code> — runs right here, over records that never left this device.
+        </p>
+      </div>
 
-      <p className="muted">
-        Runs entirely on this device — the same pure engine (<code>@healthtwin/insights</code> +{" "}
-        <code>@healthtwin/vitals</code>) that powers the cloud API, over your local records.
-      </p>
-
-      <p style={{ margin: "12px 0" }}>
-        <button type="button" className="ht-btn ht-btn-primary" onClick={seedDemoWeek} disabled={seeding}>
+      <p style={{ margin: "0 0 8px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <button type="button" className="btn btn-primary" onClick={seedDemoWeek} disabled={seeding}>
           {seeding ? "Seeding…" : "Seed a demo week"}
-        </button>{" "}
-        <span className="muted">a correlated week (short sleep → knee flares) to try it out.</span>
+        </button>
+        <span className="muted">a correlated week — short sleep, then knee flares.</span>
       </p>
 
       {summary ? (
@@ -85,7 +82,7 @@ export default function InsightsPage() {
                 {kinds.map((k) => {
                   const l = latest(samples, k);
                   return l ? (
-                    <span key={k} className="vital-chip">{k.replace(/_/g, " ")}: {l.value} {l.unit}</span>
+                    <span key={k} className="vital-chip">{k.replace(/_/g, " ")} <b>{l.value} {l.unit}</b></span>
                   ) : null;
                 })}
               </div>
@@ -98,16 +95,14 @@ export default function InsightsPage() {
               <p className="muted">Add vitals to see how they track your symptoms.</p>
             ) : (
               kinds.map((k) => (
-                <div key={k} style={{ marginBottom: 14 }}>
-                  <CorrelationView observations={observations} samples={samples} kind={k} />
-                </div>
+                <CorrelationView key={k} observations={observations} samples={samples} kind={k} />
               ))
             )}
           </section>
         </>
       ) : (
-        <p className="muted">No symptoms logged yet — capture a few entries (or seed a demo week) to see insights.</p>
+        <p className="empty">No symptoms logged yet — capture a few entries (or seed a demo week) to see insights.</p>
       )}
-    </main>
+    </>
   );
 }
