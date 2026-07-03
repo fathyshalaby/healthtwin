@@ -10,7 +10,8 @@
     "build": "tsup"
   },
   "dependencies": {
-    "@healthtwin/core": "workspace:*"
+    "@healthtwin/core": "workspace:*",
+    "@healthtwin/vitals": "workspace:*"
   },
   "devDependencies": {
     "vitest": "^2.1.0",
