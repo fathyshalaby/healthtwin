@@ -20,7 +20,7 @@ The architecture is the right one for this product. The bugs are mostly **unfini
 |---|---|---|
 | **Observation log** | One capture = one immutable row. Edit appends a record with `supersedes`; delete appends `tombstone`. `foldLog` hides superseded + tombstoned rows. Zod + ULID in `@healthtwin/core`. | **Yes.** This is the right clinical/sync model. |
 | **Local store** | Web: IndexedDB (`createIdbStore`). Native Expo: SQLite via `SqlDb` seam. Memory store for tests. | **Yes** for local-first. |
-| **Sync** | `runSync` pushes unsynced ids, then pulls one page (`seq` cursor, 500 rows). Idempotent because ids are unique. | **Mostly.** Happy-path is correct. No retry/backoff, provider has no `.catch` on `void sync()`, pull is single-page so a large backlog needs many ticks. |
+| **Sync** | `runSync` pushes unsynced ids, then pulls one page (`seq` cursor, 500 rows). Idempotent because ids are unique. | **Mostly.** Happy-path is correct. Provider now swallows adapter errors so a down backend cannot drop a local capture. Still no backoff; pull is single-page so a large backlog needs many ticks. |
 | **Body map** | Geometric SVG (ellipses + rounded rects) in `@healthtwin/bodymap-core`; React paints paths; native re-paints the same `d` via `react-native-svg`. | **Yes as a stylized figure.** Hit targets on small joints (knee/hand/foot) are ~22px — easy to miss. Not clinical art. |
 | **Capture UI** | Tap region → `EntrySheet` (type, quality chips, 0–10, time, note, tags) → `add()`. Entries list can edit/delete. Front/Back toggle. | **Yes** on web. Expo capture has type/quality/intensity, no note/time/tags/edit. |
 | **Review** | `ReviewPanel`: view toggle, 7d/30d/all, heatmap metric, tap-region filters timeline. | **Yes.** |
@@ -28,7 +28,7 @@ The architecture is the right one for this product. The bugs are mostly **unfini
 | **Partner page** | Renders `cohortSummary(demoCohort(42))` — **synthetic**. Real tenant analytics live at `GET /api/partner/analytics` (service role + partner JWT) and are unused by this page. | **Demo is honest** (`demo · synthetic cohort`). Do not treat the dashboard as live. |
 | **Embed** | Custom element wraps React capture, emits `healthtwin:observation` + origin-pinned `postMessage`. | **Contract is correct.** On `main`, `app/embed/page.tsx` **statically imports** `@healthtwin/embed`, which extends `HTMLElement` — **SSR `HTMLElement is not defined`** on `next start`. Page still hydrates client-side. Fixed in PR #17. |
 | **Cloud / RLS** | SQL migrations exist (observations, consent, audit, partner, pgcrypto helpers, purge, samples, webhooks). Web switches to magic-link + `createCloudAdapter` when `NEXT_PUBLIC_SUPABASE_*` is set. | **Designed correctly, unverified live.** `live.test.ts` and RLS-denial tests skip without env. CI does not run Supabase. |
-| **Share / consent** | `/share` can create/list/revoke grants **in cloud mode**. Not in the nav. Grantor-update policy has `USING` but no `WITH CHECK`. Granted-select does not hide tombstones. | **Plumbing yes, product no.** |
+| **Share / consent** | `/share` can create/list/revoke grants **in cloud mode** (now in the nav). Grantor-update policy has `USING` but no `WITH CHECK`. Granted-select does not hide tombstones. | **Plumbing yes, product no.** |
 | **GDPR export/erase** | `GET /api/export` and `POST /api/erase` (service-role `purge_subject`). No in-app buttons. Export previously sent `exportedAt: null`. | **API stubs, not a user flow.** |
 | **Vitals / wearables** | `@healthtwin/vitals` maps HealthKit / Google Fit **record shapes** → samples. No HealthKit/Google Fit SDK, no device permission, no background ingest. | **Mapper is correct. Landing copy overclaims.** |
 | **Auth session** | Cloud: one `currentUserId()` on mount. No `onAuthStateChange`, no sign-out in the UI. Badge always said `LOCAL`. | **Incomplete** for a shared-device health app. |
@@ -72,11 +72,11 @@ Landing: “HIPAA / GDPR-aware”. README: RLS, consent, audit, pgcrypto.
 What is actually true:
 
 - **RLS SQL exists** (owner-only + grant-based select). Not live-verified in CI.
-- **Consent grants** exist as SQL + `/share` UI (hidden) + API helpers. No clinician portal that *reads* a grant.
+- **Consent grants** exist as SQL + `/share` UI + API helpers. No clinician portal that *reads* a grant.
 - **Audit** logs observation **inserts** only — not reads, shares, or exports.
 - **pgcrypto** helpers exist; **not** wired as a default write trigger. Notes are plaintext unless you opt in.
 - **`/api/erase`** hard-deletes for the authed uid via service role — no UI, no backup story, no samples-only confirmation.
-- **`/api/export`** returns observations JSON — no vitals, no in-app download, timestamp was `null`.
+- **`/api/export`** returns observations JSON — no vitals, no in-app download.
 - No BAA/DPA, no `SECURITY.md`, no EU residency, no capture-consent screen before first log.
 - `grants_update_own` has no `WITH CHECK` (grantor can mutate grantee/scope after insert).
 - `observations_select_granted` does not filter tombstones (deleted rows still flow to a clinician).
@@ -106,8 +106,8 @@ Treat “HIPAA/GDPR” as **design intent**, not a verified posture.
 
 ### Product chrome
 
-- `/share` exists, not in nav.
 - Landing “See the live demo” → GitHub unless `NEXT_PUBLIC_APP_URL` is set.
+- Vercel previews have been failing on `main` too (no deploy config). This branch adds `vercel.json` so the Git integration can build `@healthtwin/web`; the dashboard Root Directory may still need to be `apps/web`.
 - README still says `apps/web` is “capture + /review” and native is a “scaffold”; both are larger than that.
 - Test badge says “~49 unit + 4 e2e”; unit count is higher; e2e is 4 on `main`.
 - Packages not published to npm; no changesets.
