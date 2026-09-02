@@ -33,4 +33,43 @@ describe("provider sync", () => {
     );
     await waitFor(() => screen.getByText("reader: 1"));
   });
+
+  it("keeps a local append if the adapter throws (local-first)", async () => {
+    const adapter: SyncAdapter = {
+      async push() { throw new Error("offline"); },
+      async pull() { throw new Error("offline"); },
+    };
+    function Writer() {
+      const { observations, add, loading } = useObservations();
+      if (loading) return <p>loading</p>;
+      return (
+        <>
+          <p>count: {observations.length}</p>
+          <button
+            type="button"
+            onClick={() =>
+              void add({
+                location: { regionId: "knee", side: "left", view: "anterior" },
+                type: "pain",
+                intensity: 4,
+              })
+            }
+          >
+            log
+          </button>
+        </>
+      );
+    }
+    render(
+      <HealthTwinProvider
+        store={createMemoryStore()} subjectId="s" origin="d"
+        adapter={adapter} syncMeta={createMemorySyncMeta()}
+      >
+        <Writer />
+      </HealthTwinProvider>,
+    );
+    await waitFor(() => screen.getByText("count: 0"));
+    screen.getByText("log").click();
+    await waitFor(() => screen.getByText("count: 1"));
+  });
 });
