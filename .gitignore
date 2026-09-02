@@ -12,3 +12,12 @@ build/
 test-results/
 playwright-report/
 .last-run.json
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.gradle/
+*.iml
+packages/swift/.build/
+packages/android/build/
+packages/flutter/build/
+packages/flutter/example/build/
