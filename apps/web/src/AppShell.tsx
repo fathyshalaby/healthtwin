@@ -43,7 +43,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             HealthTwin
           </span>
           <span className="flex items-center gap-2">
-            <Badge variant="outline" className="app-status gap-1.5 font-mono text-[10px] tracking-[0.14em] uppercase">
+            <Badge variant="outline" className="app-status gap-1.5 font-mono text-[10px] tracking-[0.14em] text-muted-foreground uppercase">
               {cloud ? "CLOUD" : "THIS DEVICE"}
             </Badge>
             <ThemeToggle />
