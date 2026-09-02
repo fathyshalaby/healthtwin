@@ -92,7 +92,7 @@ flowchart TD
 | [`packages/flutter`](packages/flutter) | Flutter SDK — `HealthTwinCapture` / `HealthTwinReview` (iOS, Android, desktop) |
 | [`packages/swift`](packages/swift) | SwiftPM — `HealthTwinCore` + SwiftUI `HealthTwinCaptureView` |
 | [`packages/android`](packages/android) | Kotlin JVM core + Jetpack Compose `BodyMap` |
-| [`apps/web`](apps/web) | Next.js app — capture, review, insights, **clinician report**, embed demo |
+| [`apps/web`](apps/web) | Next.js app — capture, review, insights, partner analytics, **clinician report**, embed demo |
 | [`apps/native`](apps/native) | Expo app (excluded from the default workspace) |
 
 ## Using the SDK

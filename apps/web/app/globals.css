@@ -89,10 +89,11 @@ h1, h2, h3 { font-family: var(--font-display), var(--font-body), sans-serif; let
 .figure svg { display: block; width: 100%; height: 360px; }
 /* body-map path interactions (fills are inline on the SVG; only touch stroke/filter) */
 .figure svg .ht-fill { transition: stroke-width .12s ease, filter .15s ease; }
-.figure svg .ht-hit:hover + .ht-fill { stroke-width: 2; filter: brightness(1.04); }
-.figure svg .ht-hit[aria-pressed="true"] + .ht-fill { filter: drop-shadow(0 3px 8px rgba(37, 99, 235, .5)); animation: pulse 2.4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+.figure svg .ht-region:hover .ht-fill { stroke-width: 2; filter: brightness(1.04); }
+.figure svg .ht-region:has([aria-pressed="true"]) .ht-fill { filter: drop-shadow(0 3px 8px rgba(37, 99, 235, .5)); animation: pulse 2.4s ease-in-out infinite; }
+.figure svg .ht-region:has([aria-pressed="true"]) { transform-origin: center; transform-box: fill-box; }
 .figure svg .ht-hit:focus-visible { outline: none; }
-.figure svg .ht-hit:focus-visible + .ht-fill { stroke-width: 2.5; filter: drop-shadow(0 0 4px var(--cool)); }
+.figure svg .ht-region:has(.ht-hit:focus-visible) .ht-fill { stroke-width: 2.5; filter: drop-shadow(0 0 4px var(--cool)); }
 
 /* ── segmented controls (ViewToggle group + metric/range radiogroups) ─────── */
 [role="group"][aria-label="Body view"],
