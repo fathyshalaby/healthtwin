@@ -4,6 +4,7 @@ import { HealthTwinProvider, createIdbStore } from "@healthtwin/react";
 import { currentUserId, signInWithEmailOtp } from "@healthtwin/supabase";
 import type { LocalStore, SyncAdapter, SyncMeta } from "@healthtwin/core";
 import { getCloudConfig } from "../src/cloud";
+import { DataBar } from "../src/DataBar";
 
 interface Ready {
   store: LocalStore;
@@ -74,6 +75,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       adapter={ready.adapter}
       syncMeta={ready.syncMeta}
     >
+      <DataBar />
       {children}
     </HealthTwinProvider>
   );

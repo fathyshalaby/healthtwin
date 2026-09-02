@@ -11,7 +11,53 @@ overrides:
 importers:
 
   .:
+    dependencies:
+      '@anthropic-ai/sdk':
+        specifier: '>=0.40.0'
+        version: 0.109.1(zod@3.25.76)
+      '@healthtwin/core':
+        specifier: workspace:*
+        version: link:packages/core
+      '@healthtwin/embed':
+        specifier: workspace:*
+        version: link:packages/embed
+      '@healthtwin/insights':
+        specifier: workspace:*
+        version: link:packages/insights
+      '@healthtwin/ratelimit':
+        specifier: workspace:*
+        version: link:packages/ratelimit
+      '@healthtwin/react':
+        specifier: workspace:*
+        version: link:packages/react
+      '@healthtwin/supabase':
+        specifier: workspace:*
+        version: link:packages/supabase
+      '@healthtwin/vitals':
+        specifier: workspace:*
+        version: link:packages/vitals
+      '@supabase/supabase-js':
+        specifier: ^2.45.0
+        version: 2.110.0
+      next:
+        specifier: ^15.0.0
+        version: 15.5.20(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      react:
+        specifier: ^19.0.0
+        version: 19.2.7
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.7(react@19.2.7)
     devDependencies:
+      '@types/node':
+        specifier: 20.17.6
+        version: 20.17.6
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.17)
       tsup:
         specifier: ^8.3.0
         version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)

@@ -107,7 +107,7 @@ Treat “HIPAA/GDPR” as **design intent**, not a verified posture.
 ### Product chrome
 
 - Landing “See the live demo” → GitHub unless `NEXT_PUBLIC_APP_URL` is set.
-- Vercel previews have been failing on `main` too (no deploy config). This branch adds `vercel.json` so the Git integration can build `@healthtwin/web`; the dashboard Root Directory may still need to be `apps/web`.
+- Vercel Git deploys failed because the Next app lives in `apps/web` and `rootDirectory` is not a valid `vercel.json` key. This branch adds a root `next.config.mjs` + `app`/`src` symlinks so the builder can see Next at the git root.
 - README still says `apps/web` is “capture + /review” and native is a “scaffold”; both are larger than that.
 - Test badge says “~49 unit + 4 e2e”; unit count is higher; e2e is 4 on `main`.
 - Packages not published to npm; no changesets.

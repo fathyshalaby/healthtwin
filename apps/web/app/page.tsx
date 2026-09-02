@@ -9,10 +9,12 @@ export default function Home() {
       <div className="page-head">
         <span className="eyebrow">Capture</span>
         <h1>Tap where it hurts</h1>
-        <p className="lede">Log how it feels — it becomes a longitudinal record you and your clinician can read.</p>
+        <p className="lede">Log how it feels — it autosaves in this browser as a longitudinal record you can review, export, or hand to a clinician.</p>
       </div>
-      <CaptureBoard />
-      <EntriesList />
+      <div className="capture-grid">
+        <CaptureBoard />
+        <EntriesList />
+      </div>
     </>
   );
 }

@@ -3,6 +3,12 @@ import { createRoot, type Root } from "react-dom/client";
 import { HealthTwinProvider, BodyMapCapture, createIdbStore } from "@healthtwin/react";
 import type { LocalStore, Observation, BodyView } from "@healthtwin/core";
 
+// Next.js (and other SSR) evaluate this module on the server, where HTMLElement
+// does not exist. Fall back to a no-op base so import is safe; customElements
+// registration only happens in the browser via defineHealthTwinCapture().
+const HTMLElementBase: typeof HTMLElement =
+  typeof HTMLElement === "undefined" ? (class {} as typeof HTMLElement) : HTMLElement;
+
 /** Wrap a store so each captured observation is emitted to the host. */
 function emittingStore(base: LocalStore, emit: (o: Observation) => void): LocalStore {
   return {
@@ -20,7 +26,7 @@ function emittingStore(base: LocalStore, emit: (o: Observation) => void): LocalS
  * frame) on every capture — so a partner can keep data in their own backend.
  * Advanced: set `.store` to a custom LocalStore (e.g. a partner adapter) before mount.
  */
-export class HealthTwinCaptureElement extends HTMLElement {
+export class HealthTwinCaptureElement extends HTMLElementBase {
   private root?: Root;
   private _store?: LocalStore;
 
