@@ -3,6 +3,10 @@ import * as React from "react";
 import { useObservations, EntrySheet } from "@healthtwin/react";
 import { getRegion, type Observation } from "@healthtwin/core";
 import { IntensityMeter } from "./IntensityMeter";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 function relTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -20,42 +24,55 @@ export function EntriesList() {
 
   return (
     <section className="entries" aria-label="Logged entries">
-      <div className="entries-head">
-        <h2>Entries</h2>
-        <span className="count">{observations.length}</span>
-      </div>
+      <Card>
+        <CardHeader className="flex flex-row items-baseline justify-between border-b pb-3">
+          <CardTitle>Entries</CardTitle>
+          <span className="font-mono text-sm text-muted-foreground">{observations.length}</span>
+        </CardHeader>
+        <CardContent className="pt-4">
+          {observations.length === 0 ? (
+            <p className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+              No entries yet. Tap a region on the body map to log the first one.
+            </p>
+          ) : (
+            <ul className="m-0 grid list-none gap-2.5 p-0">
+              {observations.map((o) => (
+                <li
+                  key={o.id}
+                  data-testid="entry"
+                  className="flex items-center gap-3 rounded-lg border bg-background/60 px-3 py-3"
+                >
+                  <div className="grid min-w-0 flex-1 gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-heading font-semibold tracking-tight">
+                        {getRegion(o.location.regionId)?.label ?? o.location.regionId}
+                      </span>
+                      <span className="inline-flex flex-wrap gap-1">
+                        <Badge variant="secondary" className="capitalize">{o.type}</Badge>
+                        {(o.quality ?? []).map((q) => (
+                          <Badge key={q} variant="outline" className="capitalize">{q}</Badge>
+                        ))}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {o.intensity != null && <IntensityMeter value={o.intensity} />}
+                      <span className="font-mono text-xs text-muted-foreground">{relTime(o.occurredAt)}</span>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 flex-col gap-1">
+                    <Button type="button" variant="ghost" size="xs" onClick={() => setEditing(o)}>Edit</Button>
+                    <Button type="button" variant="destructive" size="xs" onClick={() => remove(o)}>Delete</Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
 
-      {observations.length === 0 ? (
-        <p className="empty">No entries yet. Tap a region on the body map to log the first one.</p>
-      ) : (
-        <ul className="entry-list">
-          {observations.map((o) => (
-            <li key={o.id} data-testid="entry" className="entry">
-              <div className="entry-body">
-                <div className="entry-top">
-                  <span className="entry-region">{getRegion(o.location.regionId)?.label ?? o.location.regionId}</span>
-                  <span className="entry-tags">
-                    <span className="tag tag-type">{o.type}</span>
-                    {(o.quality ?? []).map((q) => <span key={q} className="tag">{q}</span>)}
-                  </span>
-                </div>
-                <div className="entry-meta">
-                  {o.intensity != null && <IntensityMeter value={o.intensity} />}
-                  <span className="entry-time">{relTime(o.occurredAt)}</span>
-                </div>
-              </div>
-              <div className="entry-actions">
-                <button type="button" className="icon-btn" onClick={() => setEditing(o)}>Edit</button>
-                <button type="button" className="icon-btn danger" onClick={() => remove(o)}>Delete</button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {editing && (
-        <div className="sheet-backdrop" onClick={() => setEditing(null)}>
-          <div className="sheet" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+      <Sheet open={editing != null} onOpenChange={(open) => { if (!open) setEditing(null); }}>
+        <SheetContent side="bottom" className="max-h-[90vh] overflow-y-auto sm:mx-auto sm:max-w-lg sm:rounded-t-2xl">
+          {editing && (
             <EntrySheet
               regionId={editing.location.regionId}
               regionLabel={getRegion(editing.location.regionId)?.label ?? editing.location.regionId}
@@ -69,9 +86,9 @@ export function EntriesList() {
               onSubmit={async (patch) => { await edit(editing, patch); setEditing(null); }}
               onCancel={() => setEditing(null)}
             />
-          </div>
-        </div>
-      )}
+          )}
+        </SheetContent>
+      </Sheet>
     </section>
   );
 }

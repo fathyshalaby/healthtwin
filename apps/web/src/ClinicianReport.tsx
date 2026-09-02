@@ -6,6 +6,7 @@ import { summarize, templateNarrator } from "@healthtwin/insights";
 import { buildTwinExport, downloadJson, exportFilename } from "./twinExport";
 import { getCloudConfig } from "./cloud";
 import { IntensityMeter } from "./IntensityMeter";
+import { Button } from "@/components/ui/button";
 
 const sampleStore = createIdbSampleStore();
 
@@ -54,9 +55,9 @@ export function ClinicianReport() {
             {cloud ? " in the signed-in HealthTwin account." : " locally in this browser (IndexedDB)."}
           </p>
         </div>
-        <div className="report-actions no-print">
-          <button type="button" className="btn btn-ghost" onClick={exportTwin} data-testid="report-export">Download JSON</button>
-          <button type="button" className="btn btn-primary" onClick={printReport}>Print / save PDF</button>
+        <div className="report-actions no-print flex flex-wrap gap-2">
+          <Button type="button" variant="outline" onClick={exportTwin} data-testid="report-export">Download JSON</Button>
+          <Button type="button" onClick={printReport}>Print / save PDF</Button>
         </div>
       </header>
 

@@ -1,14 +1,12 @@
+import { PageHeader } from "../../src/components/PageHeader";
+
 export default function SdkPage() {
   return (
     <>
-      <div className="page-head">
-        <span className="eyebrow">SDK · Flutter · Swift · Kotlin</span>
-        <h1>The same figure, in partner apps</h1>
-        <p className="lede">
-          Geometry lives in <code>packages/mobile/shapes.json</code>. Each native SDK only paints pixels and hit-tests.
-          Stores are in-memory until you persist them in your own backend — same idea as the web embed events.
-        </p>
-      </div>
+      <PageHeader eyebrow="SDK · Flutter · Swift · Kotlin" title="The same figure, in partner apps">
+        Geometry lives in <code>packages/mobile/shapes.json</code>. Each native SDK only paints pixels and hit-tests.
+        Stores are in-memory until you persist them in your own backend — same idea as the web embed events.
+      </PageHeader>
 
       <section className="card">
         <h2>Flutter</h2>
