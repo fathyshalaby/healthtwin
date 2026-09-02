@@ -4,6 +4,9 @@ dist/
 build/
 .next/
 .expo/
+.gradle/
+.dart_tool/
+.build/
 *.log
 .env
 .env.*

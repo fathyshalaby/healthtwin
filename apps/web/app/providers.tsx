@@ -4,6 +4,10 @@ import { HealthTwinProvider, createIdbStore } from "@healthtwin/react";
 import { currentUserId, signInWithEmailOtp } from "@healthtwin/supabase";
 import type { LocalStore, SyncAdapter, SyncMeta } from "@healthtwin/core";
 import { getCloudConfig } from "../src/cloud";
+import { DataBar } from "../src/DataBar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface Ready {
   store: LocalStore;
@@ -55,10 +59,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
           if (cloud) { await signInWithEmailOtp(cloud.client, email); setSent(true); }
         }}
       >
-        <h1>Sign in to HealthTwin</h1>
-        <label htmlFor="email">Email</label>
-        <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-        <button type="submit">Send magic link</button>
+        <h1 className="font-heading text-2xl font-semibold">Sign in to HealthTwin</h1>
+        <Label htmlFor="email">Email</Label>
+        <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+        <Button type="submit">Send magic link</Button>
         {sent && <p>Check your email for a sign-in link.</p>}
       </form>
     );
@@ -74,6 +78,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       adapter={ready.adapter}
       syncMeta={ready.syncMeta}
     >
+      <DataBar />
       {children}
     </HealthTwinProvider>
   );

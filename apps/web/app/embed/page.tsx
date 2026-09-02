@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import type { Observation } from "@healthtwin/core";
+import { PageHeader } from "../../src/components/PageHeader";
 
 interface Ev { region: string; side: string; type: string; intensity?: number; }
 
@@ -35,14 +36,10 @@ export default function EmbedDemo() {
 
   return (
     <>
-      <div className="page-head">
-        <span className="eyebrow">SDK · Embed</span>
-        <h1>Drop it into any site</h1>
-        <p className="lede">
-          One custom element. Every capture fires a <code>healthtwin:observation</code> event — so a
-          partner can keep the data in their own backend, no HealthTwin account required.
-        </p>
-      </div>
+      <PageHeader eyebrow="SDK · Embed" title="Drop it into any site">
+        One custom element. Every capture fires a <code>healthtwin:observation</code> event — so a
+        partner can keep the data in their own backend, no HealthTwin account required.
+      </PageHeader>
 
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
         <pre className="code-oneline">{`<script type="module">

@@ -9,7 +9,7 @@ usable as your own app *and* as an SDK that clinics and fitness platforms embed.
 
 [![CI](https://github.com/fathyshalaby/healthtwin/actions/workflows/ci.yml/badge.svg)](https://github.com/fathyshalaby/healthtwin/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-![Tests](https://img.shields.io/badge/tests-60%20unit%20%2B%206%20e2e-brightgreen)
+![Tests](https://img.shields.io/badge/tests-unit%20%2B%20e2e%20%2B%20native%20SDKs-brightgreen)
 ![Status](https://img.shields.io/badge/status-alpha-orange)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
 ![pnpm](https://img.shields.io/badge/monorepo-pnpm%20%2B%20Turborepo-f69220)
@@ -27,10 +27,11 @@ intensely, when, and in what context ("sore after PT," "worse in the mornings").
 
 - 🧍 **Body-map capture** — tap a region (front **or** back) on a 2D anatomical map; log type · quality · 0–10 intensity · note · time · context; **edit or delete** any entry (immutable supersede/tombstone).
 - 🔥 **Review** — a **heatmap** (frequency / mean intensity / recency) over a **date window**, plus a day-grouped **timeline** you can filter by tapping a region.
-- 📴 **Local-first** — capture works offline; syncs through a pluggable backend when online.
+- 📴 **Local-first** — every tap **autosaves in this browser** (IndexedDB). Download JSON anytime; cloud sync is optional.
+- 📋 **Clinician report** — `/report` prints a between-visit summary (or save as PDF) from the same local record. Live share with a clinician still needs cloud mode.
 - 🔒 **Security-first** — Postgres Row-Level Security, **consent-based sharing** (scoped/time-boxed/revocable), `partner_id` multi-tenancy from a spoof-proof JWT claim, audit log, and opt-in `pgcrypto` note encryption.
 - 🧩 **Embeddable** — drop `<health-twin-capture>` into any partner app (origin-pinned events); keep the data in *their* backend if they want.
-- 📱 **Web + native** — one shared body-map geometry renders on the web (SVG) and native (react-native-svg).
+- 📱 **Web + native** — one shared body-map geometry renders on the web (SVG), React Native, **Flutter**, **SwiftUI**, and **Jetpack Compose**.
 
 ## Quickstart
 
@@ -41,7 +42,7 @@ pnpm --filter @healthtwin/web dev   # open http://localhost:3000
 ```
 
 Then: tap a region → log a symptom → it persists (IndexedDB) across reloads → open **/review**
-to see the heatmap + timeline.
+for the heatmap, or **/report** for a print-ready clinician handoff.
 
 ## Architecture
 
@@ -56,9 +57,13 @@ flowchart TD
   react["@healthtwin/react<br/>SDK: provider · hooks · capture + review UI"]
   supa["@healthtwin/supabase<br/>cloud adapter · RLS migrations"]
   native["@healthtwin/native<br/>expo-sqlite store"]
+  flutter["packages/flutter<br/>Dart + Flutter UI"]
+  swift["packages/swift<br/>Swift + SwiftUI"]
+  android["packages/android<br/>Kotlin + Compose"]
   embed["@healthtwin/embed<br/>&lt;health-twin-capture&gt;"]
   web(["apps/web · Next.js"])
   app(["apps/native · Expo"])
+  geomjson["packages/mobile/shapes.json"]
 
   core --> bmcore --> bmreact --> react
   core --> react
@@ -70,6 +75,9 @@ flowchart TD
   bmcore --> app
   native --> app
   embed -.-> web
+  geomjson --> flutter
+  geomjson --> swift
+  geomjson --> android
 ```
 
 | Package | Responsibility |
@@ -81,8 +89,11 @@ flowchart TD
 | [`@healthtwin/supabase`](packages/supabase) | Reference cloud `SyncAdapter` + auth + RLS / consent / audit SQL migrations |
 | [`@healthtwin/native`](packages/native) | React Native / Expo `SqliteStore` over a testable `SqlDb` seam |
 | [`@healthtwin/embed`](packages/embed) | Framework-agnostic web component + partner token exchange |
-| [`apps/web`](apps/web) | Next.js app — capture, review, insights, partner analytics, embed demo |
-| [`apps/native`](apps/native) | Expo scaffold (excluded from the default workspace) |
+| [`packages/flutter`](packages/flutter) | Flutter SDK — `HealthTwinCapture` / `HealthTwinReview` (iOS, Android, desktop) |
+| [`packages/swift`](packages/swift) | SwiftPM — `HealthTwinCore` + SwiftUI `HealthTwinCaptureView` |
+| [`packages/android`](packages/android) | Kotlin JVM core + Jetpack Compose `BodyMap` |
+| [`apps/web`](apps/web) | Next.js app — capture, review, insights, partner analytics, **clinician report**, embed demo |
+| [`apps/native`](apps/native) | Expo app (excluded from the default workspace) |
 
 ## Using the SDK
 
@@ -114,6 +125,45 @@ import { HealthTwinProvider, BodyMapCapture, BodyMapReview, Timeline, createIdbS
     .addEventListener("healthtwin:observation", (e) => console.log(e.detail));
 </script>
 ```
+
+### In Flutter
+
+```dart
+import 'package:healthtwin/healthtwin.dart';
+
+final store = MemoryStore();
+HealthTwinCapture(store: store);   // tap → log
+HealthTwinReview(store: store);    // heatmap
+```
+
+### In Swift / SwiftUI
+
+```swift
+import HealthTwinCore
+import HealthTwinUI
+
+let store = MemoryStore()
+HealthTwinCaptureView(store: store)
+```
+
+### In Kotlin / Android
+
+```kotlin
+val store = MemoryStore()
+val hit = hitTest(x, y, BodyView.anterior)
+store.add(NewObservation(hit!!.location, ObservationType.pain, intensity = 6.0))
+```
+
+See [`packages/mobile`](packages/mobile) for shared geometry.
+
+## Where your data is saved
+
+On the web app, every capture is written to **IndexedDB in this browser** (`healthtwin` database) the moment you hit Save. There is no account required. That is why Capture still works offline, and why a refresh does not wipe the log.
+
+- **Keep a copy:** the bar at the top of the app (and **/report**) downloads a `healthtwin.twin.v1` JSON file — observations plus any local vitals.
+- **Hand it to a clinician:** **/report** is a print-ready between-visit summary (File → Print → Save as PDF in the browser). It is not a diagnosis.
+- **Live share:** **/share** grants a clinician read access through Postgres RLS. That path needs `NEXT_PUBLIC_SUPABASE_*`. Until then, the JSON/PDF *is* the handoff.
+- **Partner apps:** the embed fires `healthtwin:observation`; Flutter/Swift/Kotlin start with an in-memory store — persist in *your* backend if you are the controller.
 
 ## The data model
 
@@ -189,6 +239,10 @@ opt-in note encryption, an env-gated RLS-denial test, real `tsup` package builds
 ```bash
 pnpm -w test                          # unit + build (Vitest + Turborepo)
 pnpm --filter @healthtwin/web e2e     # Playwright (capture + review flows)
+python3 packages/mobile/generate.py   # refresh Flutter/Swift/Kotlin shape tables
+cd packages/flutter && flutter test   # Dart hit-test + capture widget
+cd packages/swift && swift test       # SwiftPM core
+cd packages/android && gradle test    # Kotlin JVM core
 ```
 
 Highlights: TDD throughout, `axe` accessibility assertions on the body map, RLS-shaped contract

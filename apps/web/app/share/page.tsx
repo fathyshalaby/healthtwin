@@ -2,6 +2,10 @@
 import * as React from "react";
 import { createGrant, listGrants, revokeGrant, type ConsentGrant } from "@healthtwin/supabase";
 import { getCloudConfig } from "../../src/cloud";
+import { PageHeader } from "../../src/components/PageHeader";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function Share() {
   const cloud = React.useMemo(() => getCloudConfig(), []);
@@ -17,14 +21,10 @@ export default function Share() {
   if (!cloud) {
     return (
       <>
-        <div className="page-head">
-          <span className="eyebrow">Share</span>
-          <h1>Share with a clinician</h1>
-          <p className="lede">
-            Sharing needs cloud mode — set <code>NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
-            <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>. Grants stay on the server; they are not a copy of the log.
-          </p>
-        </div>
+        <PageHeader eyebrow="Share" title="Share with a clinician">
+          Sharing needs cloud mode — set <code>NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
+          <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>. Grants stay on the server; they are not a copy of the log.
+        </PageHeader>
         <p className="empty">This device is local-only. Cloud env is not configured.</p>
       </>
     );
@@ -32,16 +32,12 @@ export default function Share() {
 
   return (
     <>
-      <div className="page-head">
-        <span className="eyebrow">Share</span>
-        <h1>Share with a clinician</h1>
-        <p className="lede">
-          A scoped, revocable grant — not a copy. The clinician reads your rows through RLS for as long as the grant is live.
-        </p>
-      </div>
+      <PageHeader eyebrow="Share" title="Share with a clinician">
+        A scoped, revocable grant — not a copy. The clinician reads your rows through RLS for as long as the grant is live.
+      </PageHeader>
 
       <form
-        className="card"
+        className="card grid gap-3"
         onSubmit={async (e) => {
           e.preventDefault();
           await createGrant(cloud.client, { grantee });
@@ -49,9 +45,9 @@ export default function Share() {
           await refresh();
         }}
       >
-        <label htmlFor="grantee">Clinician user id</label>
-        <input id="grantee" value={grantee} onChange={(e) => setGrantee(e.target.value)} required />
-        <button type="submit" className="btn btn-primary">Grant read access</button>
+        <Label htmlFor="grantee">Clinician user id</Label>
+        <Input id="grantee" value={grantee} onChange={(e) => setGrantee(e.target.value)} required />
+        <Button type="submit">Grant read access</Button>
       </form>
 
       {grants.length === 0 ? (
@@ -65,13 +61,14 @@ export default function Share() {
                 <span className="entry-meta">{g.scope}{g.revoked ? " · revoked" : ""}</span>
               </div>
               {!g.revoked && (
-                <button
+                <Button
                   type="button"
-                  className="icon-btn danger"
+                  variant="destructive"
+                  size="xs"
                   onClick={async () => { await revokeGrant(cloud.client, g.id); await refresh(); }}
                 >
                   Revoke
-                </button>
+                </Button>
               )}
             </li>
           ))}

@@ -3,6 +3,8 @@ import * as React from "react";
 import { useObservations, useVitals, createIdbSampleStore, CorrelationView } from "@healthtwin/react";
 import { summarize, templateNarrator } from "@healthtwin/insights";
 import { latest } from "@healthtwin/vitals";
+import { PageHeader } from "../../src/components/PageHeader";
+import { Button } from "@/components/ui/button";
 
 const sampleStore = createIdbSampleStore();
 
@@ -48,20 +50,16 @@ export default function InsightsPage() {
 
   return (
     <>
-      <div className="page-head">
-        <span className="eyebrow">Insights</span>
-        <h1>What moves the needle</h1>
-        <p className="lede">
-          The same engine that powers the cloud API — <code>@healthtwin/insights</code> +{" "}
-          <code>@healthtwin/vitals</code> — runs right here, over records that never left this device.
-        </p>
-      </div>
+      <PageHeader eyebrow="Insights" title="What moves the needle">
+        The same engine that powers the cloud API — <code>@healthtwin/insights</code> +{" "}
+        <code>@healthtwin/vitals</code> — runs right here, over records that never left this device.
+      </PageHeader>
 
-      <p style={{ margin: "0 0 8px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-        <button type="button" className="btn btn-primary" onClick={seedDemoWeek} disabled={seeding}>
+      <p className="mb-4 flex flex-wrap items-center gap-3">
+        <Button type="button" onClick={seedDemoWeek} disabled={seeding}>
           {seeding ? "Seeding…" : "Seed a demo week"}
-        </button>
-        <span className="muted">a correlated week — short sleep, then knee flares.</span>
+        </Button>
+        <span className="text-sm text-muted-foreground">a correlated week — short sleep, then knee flares.</span>
       </p>
 
       {summary ? (

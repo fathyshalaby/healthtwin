@@ -1,0 +1,22 @@
+name: healthtwin
+description: Embeddable HealthTwin body-map capture for Flutter (iOS, Android, desktop).
+version: 0.1.0
+homepage: https://github.com/fathyshalaby/healthtwin
+repository: https://github.com/fathyshalaby/healthtwin
+publish_to: none
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

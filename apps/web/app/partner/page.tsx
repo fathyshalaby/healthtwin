@@ -2,6 +2,7 @@
 import * as React from "react";
 import { cohortSummary } from "@healthtwin/insights";
 import { demoCohort } from "../../src/cohortDemo";
+import { PageHeader } from "../../src/components/PageHeader";
 
 export default function PartnerPage() {
   const summary = React.useMemo(
@@ -16,15 +17,11 @@ export default function PartnerPage() {
 
   return (
     <>
-      <div className="page-head">
-        <span className="eyebrow">Partner · cohort analytics</span>
-        <h1>Your cohort this month</h1>
-        <p className="lede">
-          Tenant-scoped aggregates from <code>@healthtwin/insights</code> — individual records stay
-          row-level isolated; you see only the shape of the whole.
-          <span className="demo-note">demo · synthetic cohort</span>
-        </p>
-      </div>
+      <PageHeader eyebrow="Partner · cohort analytics" title="Your cohort this month">
+        Tenant-scoped aggregates from <code>@healthtwin/insights</code> — individual records stay
+        row-level isolated; you see only the shape of the whole.
+        <span className="demo-note">demo · synthetic cohort</span>
+      </PageHeader>
 
       <div className="kpi-grid">
         <div className="kpi"><span className="kpi-val">{summary.users}</span><span className="kpi-label">Members</span></div>
