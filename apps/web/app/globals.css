@@ -88,10 +88,12 @@ h1, h2, h3 { font-family: var(--font-display), var(--font-body), sans-serif; let
 }
 .figure svg { display: block; width: 100%; height: 360px; }
 /* body-map path interactions (fills are inline on the SVG; only touch stroke/filter) */
-.figure svg path { transition: stroke-width .12s ease, filter .15s ease; }
-.figure svg path:hover { stroke-width: 2; filter: brightness(1.04); }
-.figure svg path[aria-pressed="true"] { filter: drop-shadow(0 3px 8px rgba(37, 99, 235, .5)); animation: pulse 2.4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
-.figure svg path:focus-visible { outline: none; stroke-width: 2.5; filter: drop-shadow(0 0 4px var(--cool)); }
+.figure svg .ht-fill { transition: stroke-width .12s ease, filter .15s ease; }
+.figure svg .ht-region:hover .ht-fill { stroke-width: 2; filter: brightness(1.04); }
+.figure svg .ht-region:has([aria-pressed="true"]) .ht-fill { filter: drop-shadow(0 3px 8px rgba(37, 99, 235, .5)); animation: pulse 2.4s ease-in-out infinite; }
+.figure svg .ht-region:has([aria-pressed="true"]) { transform-origin: center; transform-box: fill-box; }
+.figure svg .ht-hit:focus-visible { outline: none; }
+.figure svg .ht-region:has(.ht-hit:focus-visible) .ht-fill { stroke-width: 2.5; filter: drop-shadow(0 0 4px var(--cool)); }
 
 /* ── segmented controls (ViewToggle group + metric/range radiogroups) ─────── */
 [role="group"][aria-label="Body view"],
@@ -280,7 +282,7 @@ code { font-family: var(--font-mono), monospace; }
 }
 /* the anatomical figure glows on dark: keep the light fills, lighten stroke + grid */
 :root[data-theme="dark"] .figure { background-image: radial-gradient(rgba(107, 155, 245, .13) 1px, transparent 1.4px); }
-:root[data-theme="dark"] .figure svg path { stroke: #47607b; }
+:root[data-theme="dark"] .figure svg .ht-fill { stroke: #47607b; }
 /* primary buttons: --ink is light in dark mode, so recolor to the accent */
 :root[data-theme="dark"] .btn-primary,
 :root[data-theme="dark"] .ht-btn-primary { background: var(--cool); color: #08121e; box-shadow: 0 8px 20px -8px rgba(107, 155, 245, .5); }

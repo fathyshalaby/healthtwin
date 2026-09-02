@@ -9,7 +9,7 @@ usable as your own app *and* as an SDK that clinics and fitness platforms embed.
 
 [![CI](https://github.com/fathyshalaby/healthtwin/actions/workflows/ci.yml/badge.svg)](https://github.com/fathyshalaby/healthtwin/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-![Tests](https://img.shields.io/badge/tests-60%20unit%20%2B%204%20e2e-brightgreen)
+![Tests](https://img.shields.io/badge/tests-60%20unit%20%2B%206%20e2e-brightgreen)
 ![Status](https://img.shields.io/badge/status-alpha-orange)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
 ![pnpm](https://img.shields.io/badge/monorepo-pnpm%20%2B%20Turborepo-f69220)
@@ -81,7 +81,7 @@ flowchart TD
 | [`@healthtwin/supabase`](packages/supabase) | Reference cloud `SyncAdapter` + auth + RLS / consent / audit SQL migrations |
 | [`@healthtwin/native`](packages/native) | React Native / Expo `SqliteStore` over a testable `SqlDb` seam |
 | [`@healthtwin/embed`](packages/embed) | Framework-agnostic web component + partner token exchange |
-| [`apps/web`](apps/web) | Next.js app — capture + `/review` |
+| [`apps/web`](apps/web) | Next.js app — capture, review, insights, partner analytics, embed demo |
 | [`apps/native`](apps/native) | Expo scaffold (excluded from the default workspace) |
 
 ## Using the SDK
@@ -180,8 +180,9 @@ consent-grant API + share UI, `partner_id` multi-tenancy + a partner token-excha
 opt-in note encryption, an env-gated RLS-denial test, real `tsup` package builds
 (ESM+CJS+`.d.ts`, publishable), a self-contained embed bundle, and CI.
 
-> ⚠️ Body-map regions are still **placeholder rectangles** — swap in licensed anatomical SVG
-> art before shipping to real users. See [`WHATS-MISSING.md`](WHATS-MISSING.md) for the current gap list.
+> ⚠️ The body map is a **stylized geometric figure** (rounded limbs + joints), not licensed
+> anatomical art — swap in a clinical illustration before shipping to real users. See
+> [`WHATS-MISSING.md`](WHATS-MISSING.md) for the current gap list.
 
 ## Testing
 

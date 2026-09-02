@@ -28,4 +28,11 @@ describe("BodyMap", () => {
     const { container } = render(<BodyMap view="anterior" onSelect={() => {}} />);
     expect(await axe(container)).toHaveNoViolations();
   });
+
+  it("expands the tap target beyond the visible fill", () => {
+    render(<BodyMap view="anterior" onSelect={() => {}} />);
+    const knee = screen.getByLabelText("Left Knee");
+    expect(knee.getAttribute("stroke-width")).toBe("20");
+    expect(knee.getAttribute("stroke")).toBe("transparent");
+  });
 });
