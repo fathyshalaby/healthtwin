@@ -13,7 +13,7 @@ export async function GET(req: Request) {
 
   const observations = await pullAll(client);
   return NextResponse.json(
-    { exportedAt: null, count: observations.length, observations },
+    { exportedAt: new Date().toISOString(), count: observations.length, observations },
     { headers: { "content-disposition": 'attachment; filename="healthtwin-export.json"' } },
   );
 }

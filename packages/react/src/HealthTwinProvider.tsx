@@ -43,6 +43,8 @@ export const HealthTwinProvider: React.FC<{
     try {
       await runSync(store, syncMeta, adapter);
       await refresh();
+    } catch {
+      // Local-first: keep the append. The next successful tick retries unsynced ids.
     } finally {
       setSyncing(false);
     }
