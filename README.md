@@ -30,7 +30,7 @@ intensely, when, and in what context ("sore after PT," "worse in the mornings").
 - 📴 **Local-first** — capture works offline; syncs through a pluggable backend when online.
 - 🔒 **Security-first** — Postgres Row-Level Security, **consent-based sharing** (scoped/time-boxed/revocable), `partner_id` multi-tenancy from a spoof-proof JWT claim, audit log, and opt-in `pgcrypto` note encryption.
 - 🧩 **Embeddable** — drop `<health-twin-capture>` into any partner app (origin-pinned events); keep the data in *their* backend if they want.
-- 📱 **Web + native** — one shared body-map geometry renders on the web (SVG) and native (react-native-svg).
+- 📱 **Web + native** — one shared body-map geometry renders on the web (SVG), React Native, **Flutter**, **SwiftUI**, and **Jetpack Compose**.
 
 ## Quickstart
 
@@ -56,9 +56,13 @@ flowchart TD
   react["@healthtwin/react<br/>SDK: provider · hooks · capture + review UI"]
   supa["@healthtwin/supabase<br/>cloud adapter · RLS migrations"]
   native["@healthtwin/native<br/>expo-sqlite store"]
+  flutter["packages/flutter<br/>Dart + Flutter UI"]
+  swift["packages/swift<br/>Swift + SwiftUI"]
+  android["packages/android<br/>Kotlin + Compose"]
   embed["@healthtwin/embed<br/>&lt;health-twin-capture&gt;"]
   web(["apps/web · Next.js"])
   app(["apps/native · Expo"])
+  geomjson["packages/mobile/shapes.json"]
 
   core --> bmcore --> bmreact --> react
   core --> react
@@ -70,6 +74,9 @@ flowchart TD
   bmcore --> app
   native --> app
   embed -.-> web
+  geomjson --> flutter
+  geomjson --> swift
+  geomjson --> android
 ```
 
 | Package | Responsibility |
@@ -81,8 +88,11 @@ flowchart TD
 | [`@healthtwin/supabase`](packages/supabase) | Reference cloud `SyncAdapter` + auth + RLS / consent / audit SQL migrations |
 | [`@healthtwin/native`](packages/native) | React Native / Expo `SqliteStore` over a testable `SqlDb` seam |
 | [`@healthtwin/embed`](packages/embed) | Framework-agnostic web component + partner token exchange |
+| [`packages/flutter`](packages/flutter) | Flutter SDK — `HealthTwinCapture` / `HealthTwinReview` (iOS, Android, desktop) |
+| [`packages/swift`](packages/swift) | SwiftPM — `HealthTwinCore` + SwiftUI `HealthTwinCaptureView` |
+| [`packages/android`](packages/android) | Kotlin JVM core + Jetpack Compose `BodyMap` |
 | [`apps/web`](apps/web) | Next.js app — capture + `/review` |
-| [`apps/native`](apps/native) | Expo scaffold (excluded from the default workspace) |
+| [`apps/native`](apps/native) | Expo app (excluded from the default workspace) |
 
 ## Using the SDK
 
@@ -114,6 +124,36 @@ import { HealthTwinProvider, BodyMapCapture, BodyMapReview, Timeline, createIdbS
     .addEventListener("healthtwin:observation", (e) => console.log(e.detail));
 </script>
 ```
+
+### In Flutter
+
+```dart
+import 'package:healthtwin/healthtwin.dart';
+
+final store = MemoryStore();
+HealthTwinCapture(store: store);   // tap → log
+HealthTwinReview(store: store);    // heatmap
+```
+
+### In Swift / SwiftUI
+
+```swift
+import HealthTwinCore
+import HealthTwinUI
+
+let store = MemoryStore()
+HealthTwinCaptureView(store: store)
+```
+
+### In Kotlin / Android
+
+```kotlin
+val store = MemoryStore()
+val hit = hitTest(x, y, BodyView.anterior)
+store.add(NewObservation(hit!!.location, ObservationType.pain, intensity = 6.0))
+```
+
+See [`packages/mobile`](packages/mobile) for shared geometry.
 
 ## The data model
 
@@ -180,14 +220,19 @@ consent-grant API + share UI, `partner_id` multi-tenancy + a partner token-excha
 opt-in note encryption, an env-gated RLS-denial test, real `tsup` package builds
 (ESM+CJS+`.d.ts`, publishable), a self-contained embed bundle, and CI.
 
-> ⚠️ Body-map regions are still **placeholder rectangles** — swap in licensed anatomical SVG
-> art before shipping to real users. See [`WHATS-MISSING.md`](WHATS-MISSING.md) for the current gap list.
+> ⚠️ The body map is a **stylized geometric figure** (rounded limbs + joints), not licensed
+> anatomical art — swap in a clinical illustration before shipping to real users. See
+> [`WHATS-MISSING.md`](WHATS-MISSING.md) for the current gap list.
 
 ## Testing
 
 ```bash
 pnpm -w test                          # unit + build (Vitest + Turborepo)
 pnpm --filter @healthtwin/web e2e     # Playwright (capture + review flows)
+python3 packages/mobile/generate.py   # refresh Flutter/Swift/Kotlin shape tables
+cd packages/flutter && flutter test   # Dart hit-test + capture widget
+cd packages/swift && swift test       # SwiftPM core
+cd packages/android && gradle test    # Kotlin JVM core
 ```
 
 Highlights: TDD throughout, `axe` accessibility assertions on the body map, RLS-shaped contract
