@@ -1,6 +1,5 @@
 "use client";
 import * as React from "react";
-import { defineHealthTwinCapture } from "@healthtwin/embed";
 import type { Observation } from "@healthtwin/core";
 
 interface Ev { region: string; side: string; type: string; intensity?: number; }
@@ -11,8 +10,6 @@ export default function EmbedDemo() {
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
-    defineHealthTwinCapture();
-    setMounted(true);
     const host = hostRef.current;
     if (!host) return;
     const onObs = (e: Event) => {
@@ -23,7 +20,17 @@ export default function EmbedDemo() {
       ].slice(0, 8));
     };
     host.addEventListener("healthtwin:observation", onObs);
-    return () => host.removeEventListener("healthtwin:observation", onObs);
+    let cancelled = false;
+    // Dynamic import so the custom-element class never evaluates during SSR.
+    void import("@healthtwin/embed").then(({ defineHealthTwinCapture }) => {
+      if (cancelled) return;
+      defineHealthTwinCapture();
+      setMounted(true);
+    });
+    return () => {
+      cancelled = true;
+      host.removeEventListener("healthtwin:observation", onObs);
+    };
   }, []);
 
   return (

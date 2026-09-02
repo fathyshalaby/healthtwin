@@ -6,5 +6,9 @@ export default {
     "@healthtwin/bodymap-react",
     "@healthtwin/bodymap-core",
     "@healthtwin/core",
+    "@healthtwin/embed",
+    "@healthtwin/insights",
+    "@healthtwin/vitals",
+    "@healthtwin/ratelimit",
   ],
 };
