@@ -50,9 +50,10 @@ These match the README promise for a **local-first alpha**:
 - Edit / delete via supersede / tombstone; folded list is the live twin.
 - Review heatmap (frequency / intensity / recency) + date window + region→timeline.
 - Dark mode (`ht-theme` + FOUC-prevention script).
+- UI system (web + landing): one "thermal instrument" token set shared by light/dark, a sliding nav pill + mobile dock, ⌘K command palette, spring bottom sheet with drag-to-dismiss, live region readout on hover/focus, side-aware labels ("Left Knee"), heat-coloured entries/timeline/slider, a responsive correlation chart, a tab icon. Animation is CSS except the bottom sheet (`motion`, loaded on first tap), so first-load JS is at or below the pre-redesign size.
 - Insights: on-device summary + template narrative + correlation view (with demo seed).
 - Embed custom element + origin-pinned events (client-side).
-- Unit tests across packages + Playwright specs (capture, review, edit/delete, posterior, embed, theme; this branch adds clinician report).
+- Unit tests across packages + Playwright specs (capture, review, edit/delete, posterior, embed, theme, clinician report, ⌘K palette, phone dock, hover readout, seeded charts, no console errors on any route, axe WCAG A/AA on every route in both themes).
 - GitHub Actions: `pnpm` build + test + Playwright.
 - Package builds via tsup (installable **from the repo**, not npm).
 
@@ -116,6 +117,8 @@ Treat “HIPAA/GDPR” as **design intent**, not a verified posture.
 - Packages not published to npm; no changesets.
 - No ESLint/Prettier in CI. No i18n. No visual regression on the figure.
 - Geometric body, not licensed anatomy.
+- Body-map hit areas overlap: the 20-unit invisible hit stroke on large regions (Chest, Upper Arm) sits on top of the Shoulder's centre, so tapping the middle of a shoulder selects the chest/arm instead. Fix by layering small regions above large ones without changing keyboard tab order (or by shrinking the hit stroke on large shapes).
+- No visual-regression snapshots of the redesigned screens. (Accessibility *is* gated: an axe-core e2e audits every route in light + dark with seeded data and fails on any WCAG A/AA violation. It does not replace manual screen-reader testing.)
 
 ---
 
