@@ -32,6 +32,17 @@ describe("review surfaces", () => {
     expect(screen.getByText("2026-07-01")).toBeDefined();
   });
 
+  it("timeline rows say which side the entry was on", async () => {
+    await seeded(<Timeline />, [
+      mk("A".repeat(26), { occurredAt: "2026-07-02T09:00:00.000Z", location: { regionId: "knee", side: "right", view: "anterior" } }),
+      mk("B".repeat(26), { occurredAt: "2026-07-01T09:00:00.000Z", location: { regionId: "chest", side: "central", view: "anterior" } }),
+    ]);
+    await waitFor(() => expect(screen.getAllByTestId("timeline-entry")).toHaveLength(2));
+    const rows = screen.getAllByTestId("timeline-entry").map((r) => r.textContent ?? "");
+    expect(rows[0]).toMatch(/Right Knee — pain/);
+    expect(rows[1]).toMatch(/^Chest — pain/); // central regions take no prefix
+  });
+
   it("review renders a metric switcher and toggles selection", async () => {
     await seeded(<BodyMapReview view="anterior" />, [mk("A".repeat(26), {})]);
     await waitFor(() => expect(screen.getByLabelText("frequency")).toBeDefined());
