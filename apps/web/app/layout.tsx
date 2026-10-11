@@ -15,12 +15,23 @@ export const metadata = {
   description: "Tap where it hurts, log how it feels, and see the pattern.",
 };
 
+// viewport-fit=cover lets the mobile dock sit above the home indicator via env(safe-area-inset-bottom).
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f8fb" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b121c" },
+  ],
+};
+
 // Set the theme before first paint so there's no flash of the wrong theme.
 const THEME_INIT = `(function(){try{var t=localStorage.getItem('ht-theme')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;document.documentElement.classList.toggle('dark',t==='dark');}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn(geist.variable, display.variable, mono.variable, "font-sans")}>
+    <html lang="en" className={cn(geist.variable, display.variable, mono.variable, "font-sans")} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
       </head>

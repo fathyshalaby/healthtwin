@@ -2,6 +2,8 @@
 import * as React from "react";
 import type { Observation } from "@healthtwin/core";
 import { PageHeader } from "../../src/components/PageHeader";
+import { CodeBlock } from "../../src/components/CodeBlock";
+import { Rise } from "@/components/motion";
 
 interface Ev { region: string; side: string; type: string; intensity?: number; }
 
@@ -41,20 +43,20 @@ export default function EmbedDemo() {
         partner can keep the data in their own backend, no HealthTwin account required.
       </PageHeader>
 
-      <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-        <pre className="code-oneline">{`<script type="module">
+      <Rise delay={0.05}>
+        <CodeBlock title="index.html">{`<script type="module">
   import { defineHealthTwinCapture } from "@healthtwin/embed";
   defineHealthTwinCapture();
 </script>
 
-<health-twin-capture view="anterior" subject-id="u_123"></health-twin-capture>`}</pre>
-      </div>
+<health-twin-capture view="anterior" subject-id="u_123"></health-twin-capture>`}</CodeBlock>
+      </Rise>
 
       <div className="embed-grid">
         <div className="embed-frame" ref={hostRef}>
           <div className="embed-frame-bar">
             <span className="dot" /><span className="dot" /><span className="dot" />
-            <span style={{ marginLeft: 6 }}>partner-app.example</span>
+            <span className="ml-1.5">partner-app.example</span>
           </div>
           <div className="embed-frame-body">
             {mounted && React.createElement("health-twin-capture", { view: "anterior", "subject-id": "demo-partner" })}

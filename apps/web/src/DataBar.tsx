@@ -5,43 +5,49 @@ import { Download, FileText } from "lucide-react";
 import { useObservations } from "@healthtwin/react";
 import { getCloudConfig } from "./cloud";
 import { buildTwinExport, downloadJson, exportFilename } from "./twinExport";
+import { CountUp } from "@/components/motion";
 import { Button } from "@/components/ui/button";
 
 export function DataBar() {
   const { observations } = useObservations();
   const cloud = React.useMemo(() => getCloudConfig() != null, []);
 
-  const exportTwin = () => {
+  const exportTwin = React.useCallback(() => {
     downloadJson(
       exportFilename(),
       buildTwinExport({ observations, cloud, subjectHint: cloud ? "cloud-user" : "this-browser" }),
     );
-  };
+  }, [observations, cloud]);
+
+  // The ⌘K palette triggers the same export through a window event (it lives outside the provider).
+  React.useEffect(() => {
+    window.addEventListener("ht:export", exportTwin);
+    return () => window.removeEventListener("ht:export", exportTwin);
+  }, [exportTwin]);
 
   return (
-    <div
-      className="data-bar mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 text-sm shadow-xs"
-      data-testid="data-bar"
-    >
-      <p className="m-0 flex flex-wrap items-center gap-2 text-muted-foreground">
+    <div className="data-bar" data-testid="data-bar">
+      <p className="data-bar-copy">
         <span className="data-dot" aria-hidden />
         {cloud ? (
           <>Saved to your HealthTwin cloud, with a local copy in this browser.</>
         ) : (
           <>
-            Autosaved in <b className="font-semibold text-foreground">this browser</b> (IndexedDB). Nothing is uploaded until you turn on cloud or export a file.
+            <span>Autosaved in <b>this browser</b></span>
+            <span className="hidden md:inline">· nothing is uploaded unless you export or turn on cloud.</span>
           </>
         )}
-        <span className="font-mono text-xs tracking-wide text-primary">
-          {observations.length} live {observations.length === 1 ? "entry" : "entries"}
+        <span className="data-count">
+          <CountUp value={observations.length} duration={0.5} /> live {observations.length === 1 ? "entry" : "entries"}
         </span>
       </p>
-      <div className="data-bar-actions no-print flex flex-wrap gap-2">
+      <div className="data-bar-actions no-print">
         <Button type="button" variant="outline" size="sm" onClick={exportTwin} data-testid="export-json">
           <Download />
-          Download JSON
+          <span className="max-md:sr-only">Download JSON</span>
         </Button>
-        <Button size="sm" asChild>
+        {/* the mobile dock already links to Report, so the phone bar keeps just the export icon */}
+        <Button size="sm" asChild className="max-md:hidden">
           <Link href="/report">
             <FileText />
             Clinician report

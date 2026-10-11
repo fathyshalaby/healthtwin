@@ -1,6 +1,6 @@
 import * as React from "react";
 
-/** Read-only 0–10 intensity on the cool→amber→heat spectrum. */
+/** Read-only 0–10 intensity on the shared cool→hot heat scale. */
 export function IntensityMeter({ value }: { value: number }) {
   const v = Math.max(0, Math.min(10, value));
   return (
