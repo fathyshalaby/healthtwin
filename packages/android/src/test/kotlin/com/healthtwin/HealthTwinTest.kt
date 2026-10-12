@@ -8,7 +8,7 @@ import kotlin.test.assertNull
 class HealthTwinTest {
     @Test
     fun hitTestLeftKnee() {
-        val hit = hitTest(87.0, 272.0, BodyView.anterior)
+        val hit = hitTest(88.0, 267.0, BodyView.anterior)
         assertNotNull(hit)
         assertEquals("Left Knee", hit.label)
         assertEquals("knee", hit.regionId)
@@ -46,21 +46,21 @@ class HealthTwinTest {
 
     @Test
     fun shoulderCentreIsShoulder() {
-        assertEquals("Right Shoulder", hitTest(134.0, 82.0, BodyView.anterior)?.label)
-        assertEquals("Left Shoulder", hitTest(66.0, 82.0, BodyView.anterior)?.label)
+        assertEquals("Right Shoulder", hitTest(132.0, 91.0, BodyView.anterior)?.label)
+        assertEquals("Left Shoulder", hitTest(68.0, 91.0, BodyView.anterior)?.label)
     }
 
     @Test
     fun visibleOverlapGoesToTopmost() {
-        assertEquals("Chest", hitTest(125.0, 82.0, BodyView.anterior)?.label)
+        assertEquals("Chest", hitTest(121.0, 91.0, BodyView.anterior)?.label) // inside the shoulder cap AND the chest
     }
 
     @Test
-    fun nearMissesGoToNearestThenSmaller() {
-        assertEquals("Left Knee", hitTest(87.0, 286.5, BodyView.anterior)?.label) // knee/shin tie → knee
-        assertEquals("Left Hand", hitTest(37.0, 204.0, BodyView.anterior)?.label)
-        assertEquals("Left Hand", hitTest(40.0 - HIT_PAD, 204.0, BodyView.anterior)?.label)
-        assertNull(hitTest(40.0 - HIT_PAD - 0.5, 204.0, BodyView.anterior))
+    fun nearMissesGoToTheNearestRegion() {
+        assertEquals("Left Knee", hitTest(74.0, 267.0, BodyView.anterior)?.label) // just off the knee's outer edge
+        assertEquals("Left Hand", hitTest(47.0, 205.0, BodyView.anterior)?.label) // 3 off the hand
+        assertEquals("Left Hand", hitTest(50.0 - HIT_PAD, 205.0, BodyView.anterior)?.label)
+        assertNull(hitTest(50.0 - HIT_PAD - 0.5, 205.0, BodyView.anterior))
         assertNull(hitTest(5.0, 5.0, BodyView.anterior))
     }
 

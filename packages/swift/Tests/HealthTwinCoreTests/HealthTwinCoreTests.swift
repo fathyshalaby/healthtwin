@@ -3,7 +3,7 @@ import XCTest
 
 final class HealthTwinCoreTests: XCTestCase {
     func testHitTestLeftKnee() {
-        let hit = hitTest(x: 87, y: 272, view: .anterior)
+        let hit = hitTest(x: 88, y: 267, view: .anterior)
         XCTAssertEqual(hit?.label, "Left Knee")
         XCTAssertEqual(hit?.regionId, "knee")
         XCTAssertEqual(hit?.side, .left)
@@ -41,19 +41,19 @@ final class HealthTwinCoreTests: XCTestCase {
     }
 
     func testShoulderCentreIsShoulder() {
-        XCTAssertEqual(hitTest(x: 134, y: 82, view: .anterior)?.label, "Right Shoulder")
-        XCTAssertEqual(hitTest(x: 66, y: 82, view: .anterior)?.label, "Left Shoulder")
+        XCTAssertEqual(hitTest(x: 132, y: 91, view: .anterior)?.label, "Right Shoulder")
+        XCTAssertEqual(hitTest(x: 68, y: 91, view: .anterior)?.label, "Left Shoulder")
     }
 
     func testVisibleOverlapGoesToTopmost() {
-        XCTAssertEqual(hitTest(x: 125, y: 82, view: .anterior)?.label, "Chest")
+        XCTAssertEqual(hitTest(x: 121, y: 91, view: .anterior)?.label, "Chest") // inside the shoulder cap AND the chest
     }
 
-    func testNearMissesGoToNearestThenSmaller() {
-        XCTAssertEqual(hitTest(x: 87, y: 286.5, view: .anterior)?.label, "Left Knee")
-        XCTAssertEqual(hitTest(x: 37, y: 204, view: .anterior)?.label, "Left Hand")
-        XCTAssertEqual(hitTest(x: 40 - hitPad, y: 204, view: .anterior)?.label, "Left Hand")
-        XCTAssertNil(hitTest(x: 40 - hitPad - 0.5, y: 204, view: .anterior))
+    func testNearMissesGoToTheNearestRegion() {
+        XCTAssertEqual(hitTest(x: 74, y: 267, view: .anterior)?.label, "Left Knee") // just off the knee's outer edge
+        XCTAssertEqual(hitTest(x: 47, y: 205, view: .anterior)?.label, "Left Hand") // 3 off the hand
+        XCTAssertEqual(hitTest(x: 50 - hitPad, y: 205, view: .anterior)?.label, "Left Hand")
+        XCTAssertNil(hitTest(x: 50 - hitPad - 0.5, y: 205, view: .anterior))
         XCTAssertNil(hitTest(x: 5, y: 5, view: .anterior))
     }
 

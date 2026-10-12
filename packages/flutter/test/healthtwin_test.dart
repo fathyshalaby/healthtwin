@@ -4,7 +4,7 @@ import 'package:healthtwin/healthtwin.dart';
 
 void main() {
   test('hitTest finds Left Knee at its centroid', () {
-    final hit = hitTest(const Offset(87, 272), BodyView.anterior);
+    final hit = hitTest(const Offset(88, 267), BodyView.anterior);
     expect(hit, isNotNull);
     expect(hit!.label, 'Left Knee');
     expect(hit.regionId, 'knee');
@@ -35,19 +35,20 @@ void main() {
   });
 
   test('the centre of a shoulder is the shoulder', () {
-    expect(hitTest(const Offset(134, 82), BodyView.anterior)?.label, 'Right Shoulder');
-    expect(hitTest(const Offset(66, 82), BodyView.anterior)?.label, 'Left Shoulder');
+    expect(hitTest(const Offset(132, 91), BodyView.anterior)?.label, 'Right Shoulder');
+    expect(hitTest(const Offset(68, 91), BodyView.anterior)?.label, 'Left Shoulder');
   });
 
   test('where shapes visibly overlap, the topmost wins', () {
-    expect(hitTest(const Offset(125, 82), BodyView.anterior)?.label, 'Chest');
+    // inside the shoulder cap AND the chest
+    expect(hitTest(const Offset(121, 91), BodyView.anterior)?.label, 'Chest');
   });
 
-  test('near misses go to the nearest, then the smaller shape', () {
-    expect(hitTest(const Offset(87, 286.5), BodyView.anterior)?.label, 'Left Knee');
-    expect(hitTest(const Offset(37, 204), BodyView.anterior)?.label, 'Left Hand');
-    expect(hitTest(const Offset(40 - kHitPad, 204), BodyView.anterior)?.label, 'Left Hand');
-    expect(hitTest(const Offset(40 - kHitPad - 0.5, 204), BodyView.anterior), isNull);
+  test('near misses go to the nearest region', () {
+    expect(hitTest(const Offset(74, 267), BodyView.anterior)?.label, 'Left Knee'); // just off the knee's outer edge
+    expect(hitTest(const Offset(47, 205), BodyView.anterior)?.label, 'Left Hand'); // 3 off the hand
+    expect(hitTest(const Offset(50 - kHitPad, 205), BodyView.anterior)?.label, 'Left Hand');
+    expect(hitTest(const Offset(50 - kHitPad - 0.5, 205), BodyView.anterior), isNull);
     expect(hitTest(const Offset(5, 5), BodyView.anterior), isNull);
   });
 
@@ -91,8 +92,8 @@ void main() {
     await tester.pumpAndSettle();
 
     final map = tester.getRect(find.byType(BodyMap));
-    // viewBox 200×400 mapped onto the BodyMap box; knee centroid (87, 272).
-    final tap = Offset(map.left + map.width * (87 / 200), map.top + map.height * (272 / 400));
+    // viewBox 200×400 mapped onto the BodyMap box; knee centroid (88, 267).
+    final tap = Offset(map.left + map.width * (88 / 200), map.top + map.height * (267 / 400));
     await tester.tapAt(tap);
     await tester.pumpAndSettle();
 

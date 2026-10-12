@@ -1,4 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
+import { shapesFor } from "@healthtwin/bodymap-core";
+
+/** A front-view region's bbox — taps are derived from the shared geometry, so they follow any redraw. */
+const front = (key: string) => shapesFor("anterior").find((s) => s.key === key)!.bbox;
 
 /** Click at a point given in body-map SVG units, via the SVG's own screen transform — like a real tap. */
 async function tapAt(page: Page, ux: number, uy: number) {
@@ -76,22 +80,25 @@ test("a tap lands on the region you touched, and records where on it", async ({ 
   await page.waitForLoadState("networkidle");
   const form = (name: string) => page.getByRole("form", { name: `Log symptom for ${name}` });
 
-  // Centre of the right shoulder — the chest's and upper arm's padding used to steal this.
-  await tapAt(page, 134, 82);
+  // Centre of the right shoulder — the chest's padding used to steal this.
+  const shoulder = front("shoulder:right:anterior");
+  await tapAt(page, shoulder.x + shoulder.w / 2, shoulder.y + shoulder.h / 2);
   await expect(form("Right Shoulder")).toBeVisible();
   await page.getByRole("button", { name: "Cancel" }).click();
   await expect(form("Right Shoulder")).toBeHidden();
 
   // 3 units off the left hand (on no shape): a near miss goes to the nearest region.
   // (Tapped immediately after the previous sheet closed — that tap used to be cancelled by the closing sheet.)
-  await tapAt(page, 37, 204);
+  const hand = front("hand:left:anterior");
+  await tapAt(page, hand.x - 3, hand.y + hand.h / 2);
   await expect(form("Left Hand")).toBeVisible();
   // A tap on the backdrop still dismisses (the stale-dismiss guard must not break real outside clicks).
   await page.mouse.click(20, 20);
   await expect(form("Left Hand")).toBeHidden();
 
-  // Inside the LEFT knee, toward the right knee — used to be logged as the right knee.
-  await tapAt(page, 95, 272);
+  // Inside the LEFT knee, 4 units from its inner edge (toward the right knee) — used to be logged as the right knee.
+  const knee = front("knee:left:anterior");
+  await tapAt(page, knee.x + knee.w - 4, knee.y + knee.h / 2);
   await expect(form("Left Knee")).toBeVisible();
   await page.getByRole("button", { name: "Save" }).click();
   await expect(page.getByTestId("entry")).toHaveCount(1);
@@ -105,11 +112,9 @@ test("a tap lands on the region you touched, and records where on it", async ({ 
   }));
   expect(stored).toHaveLength(1);
   expect(stored[0].side).toBe("left");
-  // (95 − 75) / 24 ≈ 0.83 across, (272 − 259) / 26 = 0.5 down — not the old clamped {1, 1}.
-  expect(stored[0].point.x).toBeGreaterThan(0.78);
-  expect(stored[0].point.x).toBeLessThan(0.88);
-  expect(stored[0].point.y).toBeGreaterThan(0.45);
-  expect(stored[0].point.y).toBeLessThan(0.55);
+  // where on the knee it landed: (w − 4) / w across, halfway down — not the old clamped {1, 1}.
+  expect(stored[0].point.x).toBeCloseTo((knee.w - 4) / knee.w, 1);
+  expect(stored[0].point.y).toBeCloseTo(0.5, 1);
 });
 
 test("keyboard-only capture: open, cancel, save and delete — announced, with focus never lost", async ({ page }) => {

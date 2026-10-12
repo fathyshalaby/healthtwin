@@ -64,8 +64,10 @@ export const BodyMap: React.FC<BodyMapProps> = ({ view, selectedKey, shading, on
   const shapes = shapesFor(view);
   const svgRef = React.useRef<SVGSVGElement>(null);
   const [hot, setHot] = React.useState<RegionKey | null>(null);
-  // Unique per instance so two maps on one page (e.g. a report) never share a gradient id.
-  const sheenId = `ht-sheen-${React.useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+  // Unique per instance so two maps on one page (e.g. a report) never share a gradient or mask id.
+  const uid = React.useId().replace(/[^a-zA-Z0-9]/g, "");
+  const lightId = `ht-light-${uid}`;
+  const bodyId = `ht-body-${uid}`;
 
   const userPoint = (e: { clientX: number; clientY: number }) =>
     svgRef.current ? toUserSpace(svgRef.current, e.clientX, e.clientY) : null;
@@ -98,12 +100,16 @@ export const BodyMap: React.FC<BodyMapProps> = ({ view, selectedKey, shading, on
       onPointerLeave={() => setHover(null)}
     >
       <defs>
-        {/* Soft top-light → bottom-shade so flat shapes read as volumes. Purely decorative. */}
-        <linearGradient id={sheenId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#ffffff" stopOpacity="0.5" />
-          <stop offset="0.45" stopColor="#ffffff" stopOpacity="0.06" />
-          <stop offset="1" stopColor="#0b1622" stopOpacity="0.14" />
-        </linearGradient>
+        {/* One soft light from the upper left over the whole body — not a highlight per region. */}
+        <radialGradient id={lightId} gradientUnits="userSpaceOnUse" cx="70" cy="40" r="360">
+          <stop className="ht-light-hi" offset="0" stopColor="#ffffff" stopOpacity="0.55" />
+          <stop offset="0.55" stopColor="#ffffff" stopOpacity="0" />
+          <stop className="ht-light-lo" offset="1" stopColor="#0b1622" stopOpacity="0.12" />
+        </radialGradient>
+        {/* The silhouette (union of every region), so the light is applied once even where shapes overlap. */}
+        <mask id={bodyId} maskUnits="userSpaceOnUse" x="0" y="0" width={VIEWBOX.w} height={VIEWBOX.h}>
+          {shapes.map((s) => <path key={s.key} d={s.d} fill="#ffffff" />)}
+        </mask>
       </defs>
       {/* Near-miss catcher, beneath every region: a tap that lands on no shape goes to the nearest one. */}
       <rect
@@ -120,6 +126,13 @@ export const BodyMap: React.FC<BodyMapProps> = ({ view, selectedKey, shading, on
           if (s) select(s, p);
         }}
       />
+      {/* One outline around the whole figure: every region stroked here, then filled borderless on top,
+          so only the silhouette's outer edge shows — a body, not a stack of parts. */}
+      <g className="ht-outline" aria-hidden="true" pointerEvents="none">
+        {shapes.map((s) => (
+          <path key={s.key} d={s.d} fill="#7f90a8" stroke="#7f90a8" strokeWidth={2.6} strokeLinejoin="round" />
+        ))}
+      </g>
       {shapes.map((s) => {
         const selected = selectedKey === s.key;
         const shaded = shading?.get(s.key);
@@ -130,15 +143,15 @@ export const BodyMap: React.FC<BodyMapProps> = ({ view, selectedKey, shading, on
             <path
               className="ht-fill"
               d={s.d}
-              fill={selected ? "#2563eb" : (shaded ?? "#cbd5e1")}
-              stroke="#334155"
+              fill={selected ? "#2563eb" : (shaded ?? "#e3e9f1")}
+              stroke={selected || shaded ? "#ffffff" : "none"}
+              strokeOpacity={0.7}
               strokeWidth={1}
               data-selected={selected ? "" : undefined}
               data-shaded={shaded ? "" : undefined}
               pointerEvents="none"
               aria-hidden="true"
             />
-            <path className="ht-sheen" d={s.d} fill={`url(#${sheenId})`} pointerEvents="none" aria-hidden="true" />
             {/* The exact region: the accessible control, and the hit target for a tap on the region itself. */}
             <path
               className="ht-hit"
@@ -162,6 +175,15 @@ export const BodyMap: React.FC<BodyMapProps> = ({ view, selectedKey, shading, on
           </g>
         );
       })}
+      <rect className="ht-light" width={VIEWBOX.w} height={VIEWBOX.h} fill={`url(#${lightId})`} mask={`url(#${bodyId})`} pointerEvents="none" aria-hidden="true" />
+      {view === "posterior" && (
+        <path className="ht-spine" d="M100 84 V158" stroke="#7f90a8" strokeOpacity={0.35} strokeWidth={1} strokeLinecap="round" pointerEvents="none" aria-hidden="true" />
+      )}
+      {/* Which side is which. "Left" is the viewer's left in both views (the front view is a mirror). */}
+      <g className="ht-sides" aria-hidden="true" pointerEvents="none" fontSize="11" fill="#8a97ab" textAnchor="middle">
+        <text x={34} y={209}>L</text>
+        <text x={166} y={209}>R</text>
+      </g>
     </svg>
   );
 };

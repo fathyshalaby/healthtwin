@@ -134,6 +134,7 @@
 
   --body-fill: #2b3c52;
   --body-hover: #38506e;
+  --body-light: 0.14;
   --body-stroke: #5f7a99;
   --stage-glow: oklch(0.72 0.14 262 / 0.14);
   --grid-dot: oklch(0.72 0.14 262 / 0.2);
@@ -367,17 +368,16 @@
       color-mix(in oklab, var(--secondary) 55%, var(--card));
     border: 1px solid var(--border);
   }
-  svg[aria-label^="Body map"] .ht-fill {
-    stroke: var(--body-stroke); stroke-width: 1; stroke-linejoin: round;
-    transform-box: fill-box; transform-origin: center;
-    transition: fill .3s ease, stroke .2s ease, stroke-width .2s ease, filter .25s ease, transform .28s cubic-bezier(.3, 1.4, .5, 1);
-  }
-  svg[aria-label^="Body map"] .ht-fill:not([data-shaded]):not([data-selected]) { fill: var(--body-fill); }
-  svg[aria-label^="Body map"] .ht-sheen { transform-box: fill-box; transform-origin: center; transition: transform .28s cubic-bezier(.3, 1.4, .5, 1); }
+  /* one silhouette: a single outline beneath borderless regions, one light over the whole body */
+  svg[aria-label^="Body map"] .ht-outline path { fill: var(--body-stroke); stroke: var(--body-stroke); }
+  svg[aria-label^="Body map"] .ht-fill { transition: fill .25s ease, filter .25s ease; }
+  svg[aria-label^="Body map"] .ht-fill:not([data-shaded]):not([data-selected]) { fill: var(--body-fill); stroke: none; }
   svg[aria-label^="Body map"] .ht-region[data-hot] .ht-fill:not([data-shaded]):not([data-selected]) { fill: var(--body-hover); }
-  svg[aria-label^="Body map"] .ht-region[data-hot] .ht-fill { stroke-width: 1.6; transform: scale(1.035); filter: drop-shadow(0 3px 6px color-mix(in oklab, var(--foreground) 22%, transparent)); }
-  svg[aria-label^="Body map"] .ht-region[data-hot] .ht-sheen { transform: scale(1.035); }
-  svg[aria-label^="Body map"] .ht-fill[data-shaded] { stroke: color-mix(in oklab, var(--card) 60%, transparent); }
+  svg[aria-label^="Body map"] .ht-region[data-hot] .ht-fill[data-shaded] { filter: brightness(1.08) saturate(1.1); }
+  svg[aria-label^="Body map"] .ht-fill[data-shaded] { stroke: color-mix(in oklab, var(--card) 70%, transparent); stroke-width: 1; }
+  svg[aria-label^="Body map"] .ht-light-hi { stop-opacity: var(--body-light, 0.55); }
+  svg[aria-label^="Body map"] .ht-spine { stroke: var(--body-stroke); }
+  svg[aria-label^="Body map"] .ht-sides { fill: var(--muted-foreground); font-family: var(--font-mono), monospace; font-weight: 600; letter-spacing: .04em; }
   svg[aria-label^="Body map"] .ht-fill[data-selected] {
     fill: var(--primary); stroke: color-mix(in oklab, var(--primary-foreground) 70%, transparent); stroke-width: 1.6;
     filter: drop-shadow(0 0 7px color-mix(in oklab, var(--primary) 70%, transparent)); animation: glow 2.2s ease-in-out infinite;

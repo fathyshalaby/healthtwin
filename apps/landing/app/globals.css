@@ -134,8 +134,9 @@ p { text-wrap: pretty; }
 .plate-panel-head b { color: rgba(255, 255, 255, .9); font-weight: 600; }
 .plate { width: 100%; height: 430px; display: block; overflow: visible; }
 .plate-grid line { stroke: rgba(255, 255, 255, .07); stroke-width: .5; }
-.plate-cell { fill: #1a2b42; stroke: #3d5878; stroke-width: .8; }
-.plate-sheen { pointer-events: none; }
+.plate-outline path { fill: #3d5878; stroke: #3d5878; stroke-width: 2.4; stroke-linejoin: round; }
+.plate-cell { fill: #1a2b42; }
+.plate-hot { stroke: rgba(255, 255, 255, .45); stroke-width: .8; }
 .plate-hot { filter: drop-shadow(0 0 7px currentColor); animation: heat 2.8s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
 @keyframes heat { 0%, 100% { opacity: 1; } 50% { opacity: .78; } }
 .plate-pin { fill: #fff; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .5)); }

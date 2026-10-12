@@ -42,16 +42,23 @@ export function BodyMapNative({
       }}
     >
       <Svg viewBox={`0 0 ${VIEWBOX.w} ${VIEWBOX.h}`} width="100%" height="100%">
+        {/* One silhouette, like the web: stroke every region first, then fill them borderless on top. */}
         {shapes.map((s: RegionShape) => (
-          <Path
-            key={s.key}
-            d={s.d}
-            fill={selectedKey === s.key ? T.cool : (shading?.get(s.key) ?? T.bodyFill)}
-            stroke={selectedKey === s.key ? T.cool : T.bodyStroke}
-            strokeWidth={selectedKey === s.key ? 2 : 1}
-            onPress={() => pick(s)}
-          />
+          <Path key={`o-${s.key}`} d={s.d} fill={T.bodyStroke} stroke={T.bodyStroke} strokeWidth={2.6} />
         ))}
+        {shapes.map((s: RegionShape) => {
+          const marked = selectedKey === s.key || shading?.has(s.key);
+          return (
+            <Path
+              key={s.key}
+              d={s.d}
+              fill={selectedKey === s.key ? T.cool : (shading?.get(s.key) ?? T.bodyFill)}
+              stroke={marked ? "#ffffff" : undefined}
+              strokeWidth={marked ? 1 : 0}
+              onPress={() => pick(s)}
+            />
+          );
+        })}
       </Svg>
     </Pressable>
   );

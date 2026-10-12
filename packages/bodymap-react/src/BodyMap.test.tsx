@@ -2,7 +2,10 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
+import { shapesFor } from "@healthtwin/bodymap-core";
 import { BodyMap } from "./BodyMap";
+
+const shape = (key: string) => shapesFor("anterior").find((s) => s.key === key)!;
 
 describe("BodyMap", () => {
   it("renders a labeled region and fires onSelect on click", async () => {
@@ -40,11 +43,12 @@ describe("BodyMap", () => {
     const onSelect = vi.fn();
     const { container } = render(<BodyMap view="anterior" onSelect={onSelect} />);
     const at = layout(container.querySelector("svg")!);
-    // Left Knee is ell(87, 272, 12, 13) → bbox x 75..99, y 259..285; (95, 272) is right-of-centre.
-    fireEvent.click(screen.getByLabelText("Left Knee"), at(95, 272));
+    const { bbox } = shape("knee:left:anterior");
+    // a point 4 units in from the knee's right edge, halfway down
+    fireEvent.click(screen.getByLabelText("Left Knee"), at(bbox.x + bbox.w - 4, bbox.y + bbox.h / 2));
     const sel = onSelect.mock.calls[0][0];
     expect(sel.key).toBe("knee:left:anterior");
-    expect(sel.point.x).toBeCloseTo(20 / 24, 5);
+    expect(sel.point.x).toBeCloseTo((bbox.w - 4) / bbox.w, 5);
     expect(sel.point.y).toBeCloseTo(0.5, 5);
   });
 
@@ -53,11 +57,23 @@ describe("BodyMap", () => {
     const { container } = render(<BodyMap view="anterior" onSelect={onSelect} />);
     const at = layout(container.querySelector("svg")!);
     const catcher = container.querySelector(".ht-catch")!;
-    fireEvent.click(catcher, at(37, 204)); // 3 units off the left hand
+    const hand = shape("hand:left:anterior").bbox;
+    fireEvent.click(catcher, at(hand.x - 3, hand.y + hand.h / 2)); // 3 units off the left hand
     expect(onSelect).toHaveBeenLastCalledWith(expect.objectContaining({ key: "hand:left:anterior" }));
     onSelect.mockClear();
     fireEvent.click(catcher, at(5, 5)); // nothing within the pad
     expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it("draws one silhouette with L / R markers, and a spine only from behind", () => {
+    const { container, rerender } = render(<BodyMap view="anterior" onSelect={() => {}} />);
+    expect(container.querySelectorAll(".ht-outline path")).toHaveLength(shapesFor("anterior").length);
+    expect([...container.querySelectorAll(".ht-sides text")].map((t) => t.textContent)).toEqual(["L", "R"]);
+    expect(container.querySelector(".ht-spine")).toBeNull();
+    // un-shaded regions are borderless — only the silhouette has an edge
+    expect(screen.getByLabelText("Left Knee").parentElement!.querySelector(".ht-fill")!.getAttribute("stroke")).toBe("none");
+    rerender(<BodyMap view="posterior" onSelect={() => {}} />);
+    expect(container.querySelector(".ht-spine")).not.toBeNull();
   });
 
   it("keyboard (and coordinate-less assistive-tech) activation records the region centre", async () => {
