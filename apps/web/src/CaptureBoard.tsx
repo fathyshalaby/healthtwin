@@ -3,6 +3,7 @@ import * as React from "react";
 import { BodyMap, ViewToggle, EntrySheet, useObservations, type BodyMapSelection, type BodyMapHover } from "@healthtwin/react";
 import type { BodyView } from "@healthtwin/core";
 import { regionTitle } from "./lib/regions";
+import { describeEntry, useAnnounce } from "@/components/Announcer";
 import dynamic from "next/dynamic";
 import { Rise } from "@/components/motion";
 
@@ -12,6 +13,7 @@ const BottomSheet = dynamic(() => import("@/components/BottomSheet").then((m) =>
 /** The capture experience: a stage with the body figure, a live region readout, and a spring bottom sheet. */
 export function CaptureBoard() {
   const { add } = useObservations();
+  const announce = useAnnounce();
   const [view, setView] = React.useState<BodyView>("anterior");
   const [sel, setSel] = React.useState<BodyMapSelection | null>(null);
   const [hover, setHover] = React.useState<BodyMapHover | null>(null);
@@ -55,7 +57,11 @@ export function CaptureBoard() {
             side={shown.side}
             view={shown.view}
             point={shown.point}
-            onSubmit={async (input) => { await add(input); close(); }}
+            onSubmit={async (input) => {
+              await add(input);
+              close();
+              announce(`Saved: ${describeEntry(regionTitle(shown.regionId, shown.side), input.type, input.intensity)}.`);
+            }}
             onCancel={close}
           />
         )}

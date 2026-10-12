@@ -47,6 +47,22 @@ function Panel({ children, onClose }: { children: React.ReactNode; onClose: () =
   );
 }
 
+/** The backdrop. Like the panel, it stops intercepting taps the moment it starts fading out. */
+function Overlay({ style, ...props }: React.ComponentProps<typeof m.div>) {
+  const present = useIsPresent();
+  return (
+    <m.div
+      {...props}
+      className="sheet-overlay"
+      // keep Radix's own style (it re-enables pointer events on the overlay while the body is locked)
+      style={present ? style : { ...style, pointerEvents: "none" }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 0.18 } }}
+    />
+  );
+}
+
 /**
  * A bottom sheet with a spring entrance, drag-to-dismiss and a focus trap (Radix Dialog underneath).
  * `title` is announced to screen readers; the visible heading lives in `children`.
@@ -62,6 +78,25 @@ export function BottomSheet({
   title: string;
   children: React.ReactNode;
 }) {
+  // When the sheet re-opens from a tap made while it was still closing, the closing sheet's outside-click
+  // listener sees that same tap and asks to dismiss — after it re-opened. A press that began before the
+  // latest opening is the one that opened it, so it must never close it.
+  const openedAt = React.useRef(0);
+  React.useEffect(() => {
+    if (open) openedAt.current = performance.now();
+  }, [open]);
+
+  // Radix returns focus to a Dialog.Trigger on close — but these sheets open from a body region (or a list
+  // button), not a trigger, so focus would fall to <body>. Remember what was focused as the sheet opens and
+  // hand focus back to it. A layout effect runs before Radix's own effect moves focus into the sheet.
+  const returnTo = React.useRef<HTMLElement | SVGElement | null>(null);
+  React.useLayoutEffect(() => {
+    if (open) {
+      const el = document.activeElement;
+      returnTo.current = el instanceof HTMLElement || el instanceof SVGElement ? el : null;
+    }
+  }, [open]);
+
   return (
     <LazyMotion features={domMax} strict>
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -69,14 +104,23 @@ export function BottomSheet({
         {open && (
           <Dialog.Portal forceMount>
             <Dialog.Overlay asChild forceMount>
-              <m.div
-                className="sheet-overlay"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0, transition: { duration: 0.18 } }}
-              />
+              <Overlay />
             </Dialog.Overlay>
-            <Dialog.Content asChild forceMount aria-describedby={undefined}>
+            <Dialog.Content
+              asChild
+              forceMount
+              aria-describedby={undefined}
+              onPointerDownOutside={(e) => {
+                if (e.detail.originalEvent.timeStamp < openedAt.current) e.preventDefault();
+              }}
+              onCloseAutoFocus={(e) => {
+                const el = returnTo.current;
+                if (el && el.isConnected && el !== document.body) {
+                  e.preventDefault();
+                  el.focus({ preventScroll: true });
+                }
+              }}
+            >
               <div>
                 <Dialog.Title className="sr-only">{title}</Dialog.Title>
                 <Panel onClose={() => onOpenChange(false)}>{children}</Panel>

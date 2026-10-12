@@ -4,6 +4,7 @@ import { Pencil, ScanLine, Trash2 } from "lucide-react";
 import { useObservations, EntrySheet } from "@healthtwin/react";
 import type { Observation } from "@healthtwin/core";
 import { regionTitle } from "./lib/regions";
+import { describeEntry, useAnnounce } from "@/components/Announcer";
 import { IntensityMeter } from "./IntensityMeter";
 import dynamic from "next/dynamic";
 import { Rise } from "@/components/motion";
@@ -27,9 +28,18 @@ export function EntriesList() {
   const [editing, setEditing] = React.useState<Observation | null>(null);
   // Deleting plays a short collapse first, then actually removes the record.
   const [leaving, setLeaving] = React.useState<ReadonlySet<string>>(new Set());
+  const announce = useAnnounce();
+  const headingRef = React.useRef<HTMLHeadingElement>(null);
   const onDelete = (o: Observation) => {
     setLeaving((cur) => new Set(cur).add(o.id));
-    window.setTimeout(() => { void remove(o); }, 240);
+    // The focused Delete button is about to disappear — move focus to the list heading, not <body>.
+    headingRef.current?.focus();
+    window.setTimeout(() => {
+      void remove(o).then(() => {
+        const left = observations.length - 1;
+        announce(`Deleted ${regionTitle(o.location.regionId, o.location.side)} entry. ${left} ${left === 1 ? "entry" : "entries"} left.`);
+      });
+    }, 240);
   };
 
   const last = React.useRef<Observation | null>(null);
@@ -40,7 +50,7 @@ export function EntriesList() {
     <Rise delay={0.12} as="section" className="entries">
       <div className="card" aria-label="Logged entries" role="region">
         <div className="card-head">
-          <h2>Entries</h2>
+          <h2 ref={headingRef} tabIndex={-1} className="outline-none">Entries</h2>
           <span className="entries-count">{observations.length}</span>
         </div>
 
@@ -105,7 +115,11 @@ export function EntriesList() {
               type: shown.type, quality: shown.quality, intensity: shown.intensity,
               note: shown.note, contextTags: shown.contextTags, occurredAt: shown.occurredAt,
             }}
-            onSubmit={async (patch) => { await edit(shown, patch); setEditing(null); }}
+            onSubmit={async (patch) => {
+              await edit(shown, patch);
+              setEditing(null);
+              announce(`Updated: ${describeEntry(regionTitle(shown.location.regionId, shown.location.side), patch.type, patch.intensity)}.`);
+            }}
             onCancel={() => setEditing(null)}
           />
         )}

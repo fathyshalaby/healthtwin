@@ -7,6 +7,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import dynamic from "next/dynamic";
 import { PaletteTrigger } from "./PaletteTrigger";
 import { getCloudConfig } from "./cloud";
+import { AnnouncerProvider } from "@/components/Announcer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -141,7 +142,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="app-main">{children}</main>
+      <main className="app-main">
+        <AnnouncerProvider>{children}</AnnouncerProvider>
+      </main>
 
       {/* mobile: floating dock */}
       <nav className="dock" aria-label="Sections" ref={dockThumb.ref as React.RefObject<HTMLElement>}>
