@@ -1,25 +1,29 @@
-// Shared design tokens — the same clinical-instrument palette as the web app.
+import { heatColor } from "@healthtwin/bodymap-core";
+
+// Shared design tokens — the same "thermal instrument" palette as the web app (apps/web/app/globals.css).
 export const T = {
-  ink: "#0b1622",
-  ink2: "#16283b",
-  canvas: "#e9eff4",
+  ink: "#0b1420",
+  ink2: "#14233a",
+  canvas: "#f5f7fb",
   paper: "#ffffff",
-  line: "#d7e0e8",
-  lineSoft: "#e6edf2",
-  muted: "#5c6b7a",
-  cool: "#2563eb",
-  heat: "#ff5a3c",
+  line: "#dde5ee",
+  lineSoft: "#e9eef4",
+  muted: "#55687d",
+  cool: "#2f6df0",
+  heat: "#f4513a",
   amber: "#f59e0b",
-  mint: "#10b981",
+  mint: "#12b981",
+  // body figure
+  bodyFill: "#dfe6ef",
+  bodyStroke: "#7f90a8",
 } as const;
 
-/** 0–10 intensity → a point on the cool→mint→amber→heat spectrum. */
+/**
+ * 0–10 intensity → the shared cool→hot heat scale. Uses the same `heatColor` as the web body map, slider,
+ * meters and timeline, so a 7/10 is the same colour on every platform.
+ */
 export function intensityColor(v: number): string {
-  if (v <= 2) return T.cool;
-  if (v <= 4) return T.mint;
-  if (v <= 6) return T.amber;
-  if (v <= 8) return "#fb7c4d";
-  return T.heat;
+  return heatColor(Math.max(0, Math.min(10, v)) / 10);
 }
 
 export const radius = 14;

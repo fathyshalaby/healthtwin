@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/painting.dart' show HSLColor;
+
 import 'model.dart';
 
 part 'shapes.g.dart';
@@ -75,9 +77,11 @@ Shape? hitTest(Offset p, BodyView view, {double pad = kHitPad}) {
   return null;
 }
 
+/// t∈[0,1] → the shared cool→hot heat scale: hue 210 (blue) → 0 (red) at 85% saturation, 55% lightness —
+/// the same sweep as `heatColor` in @healthtwin/bodymap-core, so the web and Flutter heatmaps match.
 Color heatColor(double t) {
   final clamped = t.clamp(0.0, 1.0);
-  return Color.lerp(const Color(0xFF3B82F6), const Color(0xFFEF4444), clamped)!;
+  return HSLColor.fromAHSL(1, 210 - clamped * 210, 0.85, 0.55).toColor();
 }
 
 Map<String, Color> shadingFor(Map<String, double> values) {
