@@ -25,7 +25,7 @@ The architecture is the right one for this product. The bugs are mostly **unfini
 | **Observation log** | One capture = one immutable row. Edit appends a record with `supersedes`; delete appends `tombstone`. `foldLog` hides superseded + tombstoned rows. Zod + ULID in `@healthtwin/core`. | **Yes.** This is the right clinical/sync model. |
 | **Local store** | Web: IndexedDB (`createIdbStore`). Native Expo: SQLite via `SqlDb` seam. Memory store for tests. | **Yes** for local-first. |
 | **Sync** | `runSync` pushes unsynced ids, then pulls one page (`seq` cursor, 500 rows). Idempotent because ids are unique. | **Mostly.** Happy-path is correct. Provider now swallows adapter errors so a down backend cannot drop a local capture. Still no backoff; pull is single-page so a large backlog needs many ticks. |
-| **Body map** | Geometric SVG (ellipses + rounded rects) in `@healthtwin/bodymap-core`; React paints paths; native re-paints the same `d` via `react-native-svg`. | **Yes as a stylized figure.** Invisible hit stroke is 20 user-units (PR #17). Not clinical art. |
+| **Body map** | Geometric SVG (ellipses + rounded rects) in `@healthtwin/bodymap-core`; React paints paths; native re-paints the same `d` via `react-native-svg`. | **Yes as a stylized figure.** One hit-test rule on every platform (`hitTest` in `bodymap-core`): exact shape first, near misses to the nearest region within 10 units. Not clinical art. |
 | **Capture UI** | Tap region → `EntrySheet` (type, quality chips, 0–10, time, note, tags) → `add()`. Entries list can edit/delete. Front/Back toggle. | **Yes** on web. Expo capture has type/quality/intensity, no note/time/tags/edit. |
 | **Review** | `ReviewPanel`: view toggle, 7d/30d/all, heatmap metric, tap-region filters timeline. | **Yes.** |
 | **Insights** | `summarize()` + `templateNarrator()` run **on-device** over IndexedDB. “Seed a demo week” writes correlated knee pain + sleep/steps. Cloud `/api/insights` can use Claude if `ANTHROPIC_API_KEY` is set. | **Engine is real.** UI insights do **not** call the API. Correlation is Pearson-style over seeded/local samples, not a live wearable. |
@@ -53,7 +53,10 @@ These match the README promise for a **local-first alpha**:
 - UI system (web + landing): one "thermal instrument" token set shared by light/dark, a sliding nav pill + mobile dock, ⌘K command palette, spring bottom sheet with drag-to-dismiss, live region readout on hover/focus, side-aware labels ("Left Knee"), heat-coloured entries/timeline/slider, a responsive correlation chart, a tab icon. Animation is CSS except the bottom sheet (`motion`, loaded on first tap), so first-load JS is at or below the pre-redesign size.
 - Insights: on-device summary + template narrative + correlation view (with demo seed).
 - Embed custom element + origin-pinned events (client-side).
-- Unit tests across packages + Playwright specs (capture, review, edit/delete, posterior, embed, theme, clinician report, ⌘K palette, phone dock, hover readout, seeded charts, no console errors on any route, axe WCAG A/AA on every route in both themes).
+- Body-map hit-testing, one rule for web, React Native, Flutter, Swift and Kotlin (`hitTest` in `@healthtwin/bodymap-core`, mirrored and tested in each SDK): a tap *on* a region is that region (the topmost where shapes overlap); a near miss goes to the nearest region within 10 units, ties to the smaller. This fixed three real bugs: the centre of a shoulder selected the chest, a tap on the inner side of one knee logged the **opposite** knee, and on the web the stored `location.point` was always `{1, 1}` (CSS pixels were treated as SVG units).
+- Screen reader + keyboard: saves, edits and deletes are announced in a polite live region; focus returns to the region that opened the log sheet, and lands on the list heading after a delete. A tap made while a sheet is still closing is no longer swallowed.
+- Dependencies: `pnpm audit` is clean (was 49 advisories) — Next 15.5.27, vitest 4, the shadcn CLI no longer a runtime dependency (its one stylesheet is vendored with its MIT notice), patched postcss/nanoid/sharp/vite.
+- Unit tests across packages + Playwright specs (capture, review, edit/delete, posterior, embed, theme, clinician report, ⌘K palette, phone dock, hover readout, real-coordinate taps, keyboard-only capture with announcements, seeded charts, no console errors on any route, axe WCAG A/AA on every route in both themes).
 - GitHub Actions: `pnpm` build + test + Playwright.
 - Package builds via tsup (installable **from the repo**, not npm).
 
@@ -97,7 +100,7 @@ Treat “HIPAA/GDPR” as **design intent**, not a verified posture.
 ### Embed / geometry (PR #17, now on `main`)
 
 - `/embed` dynamically imports the custom element; `HealthTwinCaptureElement` falls back when `HTMLElement` is missing.
-- Invisible hit stroke is 20 user-units so small joints stay tappable.
+- Near misses within 10 user-units still select the nearest region, so small joints stay tappable — without a padded neighbour stealing taps that land on a region.
 - `next.config.mjs` transpiles `@healthtwin/embed` / `insights` / `vitals` / `ratelimit`.
 - e2e covers embed events and theme persist.
 
@@ -106,7 +109,7 @@ Treat “HIPAA/GDPR” as **design intent**, not a verified posture.
 - Capture / Review / Insights tabs exist.
 - Provider is **add-only**, local SQLite, **no SyncAdapter**.
 - No note / occurredAt / context tags / edit / delete on capture.
-- `apps/native` is excluded from the workspace; CI never runs it; no simulator tests.
+- `apps/native` is excluded from the workspace; CI never runs it; no simulator tests. Its body map now uses the shared hit-test and its theme the shared palette/heat scale (typechecked against stub RN types only — not run on a device).
 
 ### Product chrome
 
@@ -117,7 +120,6 @@ Treat “HIPAA/GDPR” as **design intent**, not a verified posture.
 - Packages not published to npm; no changesets.
 - No ESLint/Prettier in CI. No i18n. No visual regression on the figure.
 - Geometric body, not licensed anatomy.
-- Body-map hit areas overlap: the 20-unit invisible hit stroke on large regions (Chest, Upper Arm) sits on top of the Shoulder's centre, so tapping the middle of a shoulder selects the chest/arm instead. Fix by layering small regions above large ones without changing keyboard tab order (or by shrinking the hit stroke on large shapes).
 - No visual-regression snapshots of the redesigned screens. (Accessibility *is* gated: an axe-core e2e audits every route in light + dark with seeded data and fails on any WCAG A/AA violation. It does not replace manual screen-reader testing.)
 
 ---
