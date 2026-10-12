@@ -3,6 +3,11 @@ import { regionKey } from "@healthtwin/core";
 
 export interface BBox { x: number; y: number; w: number; h: number; }
 
+/** The geometric primitive a region is drawn from — the same data packages/mobile/shapes.json carries. */
+export type Primitive =
+  | { kind: "ellipse"; cx: number; cy: number; rx: number; ry: number }
+  | { kind: "rr"; x: number; y: number; w: number; h: number; r: number };
+
 export interface RegionShape {
   key: RegionKey;
   regionId: string;
@@ -11,11 +16,12 @@ export interface RegionShape {
   label: string;
   d: string; // SVG path
   bbox: BBox;
+  primitive: Primitive;
 }
 
 export const VIEWBOX = { w: 200, h: 400 };
 
-type Geom = { d: string; bbox: BBox };
+type Geom = { d: string; bbox: BBox; primitive: Primitive };
 
 // Rounded-rectangle path (for limbs and torso segments).
 function rr(x: number, y: number, w: number, h: number, r: number): Geom {
@@ -24,18 +30,18 @@ function rr(x: number, y: number, w: number, h: number, r: number): Geom {
     `M${x + k},${y} h${w - 2 * k} a${k},${k} 0 0 1 ${k},${k} v${h - 2 * k} ` +
     `a${k},${k} 0 0 1 ${-k},${k} h${-(w - 2 * k)} a${k},${k} 0 0 1 ${-k},${-k} ` +
     `v${-(h - 2 * k)} a${k},${k} 0 0 1 ${k},${-k} z`;
-  return { d, bbox: { x, y, w, h } };
+  return { d, bbox: { x, y, w, h }, primitive: { kind: "rr", x, y, w, h, r } };
 }
 
 // Ellipse path (for head, joints, hands, feet).
 function ell(cx: number, cy: number, rx: number, ry: number): Geom {
   const d = `M${cx - rx},${cy} a${rx},${ry} 0 1 0 ${2 * rx},0 a${rx},${ry} 0 1 0 ${-2 * rx},0 z`;
-  return { d, bbox: { x: cx - rx, y: cy - ry, w: 2 * rx, h: 2 * ry } };
+  return { d, bbox: { x: cx - rx, y: cy - ry, w: 2 * rx, h: 2 * ry }, primitive: { kind: "ellipse", cx, cy, rx, ry } };
 }
 
 const shape = (regionId: string, side: Side, view: BodyView, label: string, g: Geom): RegionShape => ({
   key: regionKey({ regionId, side, view }),
-  regionId, side, view, label, d: g.d, bbox: g.bbox,
+  regionId, side, view, label, d: g.d, bbox: g.bbox, primitive: g.primitive,
 });
 
 // A stylized humanoid on a 200×400 canvas. "left" is the viewer's left.

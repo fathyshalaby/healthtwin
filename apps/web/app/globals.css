@@ -374,9 +374,9 @@
   }
   svg[aria-label^="Body map"] .ht-fill:not([data-shaded]):not([data-selected]) { fill: var(--body-fill); }
   svg[aria-label^="Body map"] .ht-sheen { transform-box: fill-box; transform-origin: center; transition: transform .28s cubic-bezier(.3, 1.4, .5, 1); }
-  svg[aria-label^="Body map"] .ht-region:hover .ht-fill:not([data-shaded]):not([data-selected]) { fill: var(--body-hover); }
-  svg[aria-label^="Body map"] .ht-region:hover .ht-fill { stroke-width: 1.6; transform: scale(1.035); filter: drop-shadow(0 3px 6px color-mix(in oklab, var(--foreground) 22%, transparent)); }
-  svg[aria-label^="Body map"] .ht-region:hover .ht-sheen { transform: scale(1.035); }
+  svg[aria-label^="Body map"] .ht-region[data-hot] .ht-fill:not([data-shaded]):not([data-selected]) { fill: var(--body-hover); }
+  svg[aria-label^="Body map"] .ht-region[data-hot] .ht-fill { stroke-width: 1.6; transform: scale(1.035); filter: drop-shadow(0 3px 6px color-mix(in oklab, var(--foreground) 22%, transparent)); }
+  svg[aria-label^="Body map"] .ht-region[data-hot] .ht-sheen { transform: scale(1.035); }
   svg[aria-label^="Body map"] .ht-fill[data-shaded] { stroke: color-mix(in oklab, var(--card) 60%, transparent); }
   svg[aria-label^="Body map"] .ht-fill[data-selected] {
     fill: var(--primary); stroke: color-mix(in oklab, var(--primary-foreground) 70%, transparent); stroke-width: 1.6;

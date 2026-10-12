@@ -17,6 +17,40 @@ void main() {
     expect(hit!.label, 'Lower Back');
   });
 
+  // ── hit-testing: the same cases as packages/bodymap-core/src/hittest.test.ts ──
+
+  test('every region centre resolves to itself', () {
+    for (final view in BodyView.values) {
+      for (final s in shapesFor(view)) {
+        final p = s.primitive;
+        final c = p.isEllipse ? Offset(p.cx, p.cy) : Offset(p.x + p.w / 2, p.y + p.h / 2);
+        expect(hitTest(c, view)?.key, s.key, reason: '$view ${s.label}');
+      }
+    }
+  });
+
+  test('a tap inside the left knee is the left knee, not the right', () {
+    expect(hitTest(const Offset(95, 272), BodyView.anterior)?.label, 'Left Knee');
+    expect(hitTest(const Offset(105, 272), BodyView.anterior)?.label, 'Right Knee');
+  });
+
+  test('the centre of a shoulder is the shoulder', () {
+    expect(hitTest(const Offset(134, 82), BodyView.anterior)?.label, 'Right Shoulder');
+    expect(hitTest(const Offset(66, 82), BodyView.anterior)?.label, 'Left Shoulder');
+  });
+
+  test('where shapes visibly overlap, the topmost wins', () {
+    expect(hitTest(const Offset(125, 82), BodyView.anterior)?.label, 'Chest');
+  });
+
+  test('near misses go to the nearest, then the smaller shape', () {
+    expect(hitTest(const Offset(87, 286.5), BodyView.anterior)?.label, 'Left Knee');
+    expect(hitTest(const Offset(37, 204), BodyView.anterior)?.label, 'Left Hand');
+    expect(hitTest(const Offset(40 - kHitPad, 204), BodyView.anterior)?.label, 'Left Hand');
+    expect(hitTest(const Offset(40 - kHitPad - 0.5, 204), BodyView.anterior), isNull);
+    expect(hitTest(const Offset(5, 5), BodyView.anterior), isNull);
+  });
+
   test('foldLog drops tombstones and superseded rows', () {
     final store = MemoryStore();
     final a = store.add(const NewObservation(

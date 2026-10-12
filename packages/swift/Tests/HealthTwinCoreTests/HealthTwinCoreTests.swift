@@ -14,6 +14,49 @@ final class HealthTwinCoreTests: XCTestCase {
         XCTAssertEqual(hit?.label, "Lower Back")
     }
 
+    // ── hit-testing: the same cases as packages/bodymap-core/src/hittest.test.ts ──
+
+    func testEveryRegionCentreResolvesToItself() {
+        for view in [BodyView.anterior, BodyView.posterior] {
+            for s in shapes(for: view) {
+                let cx: Double
+                let cy: Double
+                switch s.primitive {
+                case let .ellipse(ex, ey, _, _):
+                    cx = ex
+                    cy = ey
+                case let .roundedRect(x, y, w, h, _):
+                    cx = x + w / 2
+                    cy = y + h / 2
+                }
+                XCTAssertEqual(hitTest(x: cx, y: cy, view: view)?.key, s.key, "\(view) \(s.label)")
+            }
+        }
+    }
+
+    func testTapInsideLeftKneeIsLeftKnee() {
+        // inside the left knee, but within the right knee's padded zone — used to return the right knee
+        XCTAssertEqual(hitTest(x: 95, y: 272, view: .anterior)?.label, "Left Knee")
+        XCTAssertEqual(hitTest(x: 105, y: 272, view: .anterior)?.label, "Right Knee")
+    }
+
+    func testShoulderCentreIsShoulder() {
+        XCTAssertEqual(hitTest(x: 134, y: 82, view: .anterior)?.label, "Right Shoulder")
+        XCTAssertEqual(hitTest(x: 66, y: 82, view: .anterior)?.label, "Left Shoulder")
+    }
+
+    func testVisibleOverlapGoesToTopmost() {
+        XCTAssertEqual(hitTest(x: 125, y: 82, view: .anterior)?.label, "Chest")
+    }
+
+    func testNearMissesGoToNearestThenSmaller() {
+        XCTAssertEqual(hitTest(x: 87, y: 286.5, view: .anterior)?.label, "Left Knee")
+        XCTAssertEqual(hitTest(x: 37, y: 204, view: .anterior)?.label, "Left Hand")
+        XCTAssertEqual(hitTest(x: 40 - hitPad, y: 204, view: .anterior)?.label, "Left Hand")
+        XCTAssertNil(hitTest(x: 40 - hitPad - 0.5, y: 204, view: .anterior))
+        XCTAssertNil(hitTest(x: 5, y: 5, view: .anterior))
+    }
+
     func testFoldLogTombstone() {
         let store = MemoryStore()
         let a = store.add(NewObservation(
