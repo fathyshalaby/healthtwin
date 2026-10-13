@@ -29,6 +29,8 @@ describe("mobile shapes.json matches web geometry", () => {
       expect(native.map((s) => s.label)).toEqual(web.map((s) => s.label));
       for (let i = 0; i < web.length; i++) {
         expect(bbox(native[i].primitive)).toEqual(web[i].bbox);
+        // Same primitive (kind + every parameter) — every SDK hit-tests the identical geometry.
+        expect(native[i].primitive).toEqual(web[i].primitive);
       }
     }
   });

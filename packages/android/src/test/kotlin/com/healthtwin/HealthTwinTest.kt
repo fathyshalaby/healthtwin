@@ -3,11 +3,12 @@ package com.healthtwin
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class HealthTwinTest {
     @Test
     fun hitTestLeftKnee() {
-        val hit = hitTest(87.0, 272.0, BodyView.anterior)
+        val hit = hitTest(88.0, 267.0, BodyView.anterior)
         assertNotNull(hit)
         assertEquals("Left Knee", hit.label)
         assertEquals("knee", hit.regionId)
@@ -19,6 +20,48 @@ class HealthTwinTest {
         val hit = hitTest(100.0, 144.0, BodyView.posterior)
         assertNotNull(hit)
         assertEquals("Lower Back", hit.label)
+    }
+
+    // ── hit-testing: the same cases as packages/bodymap-core/src/hittest.test.ts ──────────────
+
+    @Test
+    fun everyRegionCentreResolvesToItself() {
+        for (view in listOf(BodyView.anterior, BodyView.posterior)) {
+            for (s in shapesFor(view)) {
+                val (cx, cy) = when (val p = s.primitive) {
+                    is Primitive.Ellipse -> p.cx to p.cy
+                    is Primitive.RoundedRect -> (p.x + p.w / 2) to (p.y + p.h / 2)
+                }
+                assertEquals(s.key, hitTest(cx, cy, view)?.key, "$view ${s.label}")
+            }
+        }
+    }
+
+    @Test
+    fun tapInsideLeftKneeIsLeftKnee() {
+        // inside the left knee, but within the right knee's padded zone — used to return the right knee
+        assertEquals("Left Knee", hitTest(95.0, 272.0, BodyView.anterior)?.label)
+        assertEquals("Right Knee", hitTest(105.0, 272.0, BodyView.anterior)?.label)
+    }
+
+    @Test
+    fun shoulderCentreIsShoulder() {
+        assertEquals("Right Shoulder", hitTest(132.0, 91.0, BodyView.anterior)?.label)
+        assertEquals("Left Shoulder", hitTest(68.0, 91.0, BodyView.anterior)?.label)
+    }
+
+    @Test
+    fun visibleOverlapGoesToTopmost() {
+        assertEquals("Chest", hitTest(121.0, 91.0, BodyView.anterior)?.label) // inside the shoulder cap AND the chest
+    }
+
+    @Test
+    fun nearMissesGoToTheNearestRegion() {
+        assertEquals("Left Knee", hitTest(74.0, 267.0, BodyView.anterior)?.label) // just off the knee's outer edge
+        assertEquals("Left Hand", hitTest(47.0, 205.0, BodyView.anterior)?.label) // 3 off the hand
+        assertEquals("Left Hand", hitTest(50.0 - HIT_PAD, 205.0, BodyView.anterior)?.label)
+        assertNull(hitTest(50.0 - HIT_PAD - 0.5, 205.0, BodyView.anterior))
+        assertNull(hitTest(5.0, 5.0, BodyView.anterior))
     }
 
     @Test

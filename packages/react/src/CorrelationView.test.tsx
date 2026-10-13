@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { render } from "@testing-library/react";
 import { CorrelationView } from "./CorrelationView";
 import type { Observation } from "@healthtwin/core";
@@ -28,5 +28,46 @@ describe("CorrelationView", () => {
       <CorrelationView observations={[obs("2026-07-05", 5)]} samples={[sleep("2026-07-05", 300)]} kind="sleep_minutes" />,
     );
     expect(container.textContent).toMatch(/not enough overlapping days/i);
+  });
+
+  it("survives flipping between 'not enough data' and a real correlation (hook order)", () => {
+    const few = { observations: [obs("2026-07-05", 5)], samples: [sleep("2026-07-05", 300)] };
+    const enough = {
+      observations: [obs("2026-07-01", 2), obs("2026-07-02", 4), obs("2026-07-03", 6)],
+      samples: [sleep("2026-07-01", 300), sleep("2026-07-02", 400), sleep("2026-07-03", 500)],
+    };
+    const { container, rerender } = render(<CorrelationView {...few} kind="sleep_minutes" />);
+    expect(container.textContent).toMatch(/not enough overlapping days/i);
+    // Same instance, now with data: adds hooks-after-return would throw "Rendered more hooks".
+    rerender(<CorrelationView {...enough} kind="sleep_minutes" />);
+    expect(container.textContent).toMatch(/strong direct correlation/i);
+    rerender(<CorrelationView {...few} kind="sleep_minutes" />);
+    expect(container.textContent).toMatch(/not enough overlapping days/i);
+  });
+
+  describe("responsive width", () => {
+    afterEach(() => vi.unstubAllGlobals());
+
+    it("observes the chart wrapper even when it only appears after a re-render", () => {
+      const observed: Element[] = [];
+      class FakeRO {
+        constructor(_cb: ResizeObserverCallback) {}
+        observe(el: Element) { observed.push(el); }
+        disconnect() {}
+        unobserve() {}
+      }
+      vi.stubGlobal("ResizeObserver", FakeRO);
+
+      const few = { observations: [obs("2026-07-05", 5)], samples: [sleep("2026-07-05", 300)] };
+      const enough = {
+        observations: [obs("2026-07-01", 2), obs("2026-07-02", 4), obs("2026-07-03", 6)],
+        samples: [sleep("2026-07-01", 300), sleep("2026-07-02", 400), sleep("2026-07-03", 500)],
+      };
+      const { container, rerender } = render(<CorrelationView {...few} kind="sleep_minutes" />);
+      expect(observed).toHaveLength(0); // nothing to measure yet
+      rerender(<CorrelationView {...enough} kind="sleep_minutes" />);
+      expect(observed).toHaveLength(1);
+      expect(observed[0]).toBe(container.querySelector(".corr-wrap"));
+    });
   });
 });

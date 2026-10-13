@@ -8,6 +8,7 @@ import { DataBar } from "../src/DataBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MailCheck } from "lucide-react";
 
 interface Ready {
   store: LocalStore;
@@ -53,22 +54,44 @@ export function Providers({ children }: { children: React.ReactNode }) {
     const cloud = getCloudConfig();
     return (
       <form
-        style={{ maxWidth: 360, margin: "40px auto", padding: 16 }}
+        className="card mx-auto mt-10 grid max-w-sm gap-4 p-7"
         onSubmit={async (e) => {
           e.preventDefault();
           if (cloud) { await signInWithEmailOtp(cloud.client, email); setSent(true); }
         }}
       >
-        <h1 className="font-heading text-2xl font-semibold">Sign in to HealthTwin</h1>
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-        <Button type="submit">Send magic link</Button>
-        {sent && <p>Check your email for a sign-in link.</p>}
+        <div>
+          <p className="eyebrow">Cloud</p>
+          <h1 className="font-heading mt-2 text-2xl font-semibold tracking-tight">Sign in to HealthTwin</h1>
+          <p className="muted mt-1.5">We&apos;ll email you a magic link — no password to remember.</p>
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" type="email" required autoComplete="email" placeholder="you@example.com" className="h-11 rounded-xl" value={email} onChange={(e) => setEmail(e.target.value)} />
+        </div>
+        <Button type="submit" size="lg">Send magic link</Button>
+        {sent && (
+          <p className="flex items-center gap-2 rounded-xl bg-mint/10 px-3 py-2.5 text-sm text-foreground" role="status">
+            <MailCheck className="size-4 text-mint" aria-hidden /> Check your email for a sign-in link.
+          </p>
+        )}
       </form>
     );
   }
 
-  if (!ready) return null;
+  // First paint while IndexedDB opens: a quiet skeleton instead of a blank page.
+  if (!ready) {
+    return (
+      <div aria-busy="true" aria-label="Loading your twin" role="status" className="grid gap-4">
+        <div className="skeleton h-14 rounded-2xl" />
+        <div className="skeleton h-9 w-2/3 rounded-xl" />
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="skeleton h-[420px] rounded-3xl" />
+          <div className="skeleton h-[240px] rounded-3xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <HealthTwinProvider

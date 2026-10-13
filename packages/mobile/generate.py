@@ -21,10 +21,15 @@ def swift_prim(p: dict) -> str:
     return f".roundedRect(x: {p['x']}, y: {p['y']}, w: {p['w']}, h: {p['h']}, r: {p['r']})"
 
 
+def kf(v) -> str:
+    """A Kotlin Double literal: 51 -> 51.0, 51.5 -> 51.5."""
+    return repr(float(v))
+
+
 def kotlin_prim(p: dict) -> str:
     if p["kind"] == "ellipse":
-        return f"Primitive.Ellipse({p['cx']}.0, {p['cy']}.0, {p['rx']}.0, {p['ry']}.0)"
-    return f"Primitive.RoundedRect({p['x']}.0, {p['y']}.0, {p['w']}.0, {p['h']}.0, {p['r']}.0)"
+        return f"Primitive.Ellipse({kf(p['cx'])}, {kf(p['cy'])}, {kf(p['rx'])}, {kf(p['ry'])})"
+    return f"Primitive.RoundedRect({kf(p['x'])}, {kf(p['y'])}, {kf(p['w'])}, {kf(p['h'])}, {kf(p['r'])})"
 
 
 def dart() -> str:

@@ -3,6 +3,8 @@ import * as React from "react";
 import { cohortSummary } from "@healthtwin/insights";
 import { demoCohort } from "../../src/cohortDemo";
 import { PageHeader } from "../../src/components/PageHeader";
+import { Kpi } from "@/components/Kpi";
+import { Rise } from "@/components/motion";
 
 export default function PartnerPage() {
   const summary = React.useMemo(
@@ -24,37 +26,39 @@ export default function PartnerPage() {
       </PageHeader>
 
       <div className="kpi-grid">
-        <div className="kpi"><span className="kpi-val">{summary.users}</span><span className="kpi-label">Members</span></div>
-        <div className="kpi"><span className="kpi-val">{summary.activeUsers}</span><span className="kpi-label">Active 30d · {activePct}%</span></div>
-        <div className="kpi"><span className="kpi-val">{summary.totalEntries}</span><span className="kpi-label">Entries logged</span></div>
-        <div className="kpi"><span className="kpi-val">{summary.meanEntriesPerUser.toFixed(1)}</span><span className="kpi-label">Avg / member</span></div>
+        <Kpi label="Members" value={summary.users} delay={0.04} />
+        <Kpi label="Active 30d" value={summary.activeUsers} tone="mint" sub={`${activePct}% of members`} delay={0.08} />
+        <Kpi label="Entries logged" value={summary.totalEntries} tone="amber" delay={0.12} />
+        <Kpi label="Avg / member" value={summary.meanEntriesPerUser} decimals={1} tone="heat" delay={0.16} />
       </div>
 
-      <section className="card" aria-label="Top regions">
-        <h2>Where it hurts, across the cohort</h2>
-        <div className="barchart">
-          {summary.topRegions.map((r) => (
-            <div className="bar-row" key={r.regionId + r.side}>
-              <span className="bar-label">{r.label}</span>
-              <span className="bar-track"><span className="bar-fill" style={{ width: `${(r.count / regionMax) * 100}%` }} /></span>
-              <span className="bar-val">{r.count}</span>
-            </div>
-          ))}
-        </div>
-      </section>
+      <div className="report-grid">
+        <Rise delay={0.2} as="section" className="card" >
+          <div className="card-head"><h2>Where it hurts, across the cohort</h2></div>
+          <div className="barchart" aria-label="Top regions" role="group">
+            {summary.topRegions.map((r) => (
+              <div className="bar-row" key={r.regionId + r.side}>
+                <span className="bar-label">{r.label}</span>
+                <span className="bar-track"><span className="bar-fill" style={{ width: `${(r.count / regionMax) * 100}%` }} /></span>
+                <span className="bar-val">{r.count}</span>
+              </div>
+            ))}
+          </div>
+        </Rise>
 
-      <section className="card" aria-label="By symptom type">
-        <h2>By symptom type</h2>
-        <div className="barchart">
-          {types.map(([t, c]) => (
-            <div className="bar-row" key={t}>
-              <span className="bar-label">{t}</span>
-              <span className="bar-track"><span className="bar-fill alt" style={{ width: `${(c / typeMax) * 100}%` }} /></span>
-              <span className="bar-val">{c}</span>
-            </div>
-          ))}
-        </div>
-      </section>
+        <Rise delay={0.26} as="section" className="card">
+          <div className="card-head"><h2>By symptom type</h2></div>
+          <div className="barchart" aria-label="By symptom type" role="group">
+            {types.map(([t, c]) => (
+              <div className="bar-row" key={t}>
+                <span className="bar-label">{t}</span>
+                <span className="bar-track"><span className="bar-fill alt" style={{ width: `${(c / typeMax) * 100}%` }} /></span>
+                <span className="bar-val">{c}</span>
+              </div>
+            ))}
+          </div>
+        </Rise>
+      </div>
     </>
   );
 }

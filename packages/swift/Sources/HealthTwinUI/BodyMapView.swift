@@ -20,11 +20,29 @@ public struct BodyMapView: View {
             Canvas { ctx, size in
                 let sx = size.width / ViewBox.width
                 let sy = size.height / ViewBox.height
-                for s in shapes(for: view) {
-                    let fill = selectedKey == s.key ? Color.blue : (shading[s.key] ?? Color(red: 0.8, green: 0.84, blue: 0.88))
-                    ctx.fill(path(s.primitive, sx: sx, sy: sy), with: .color(fill))
-                    ctx.stroke(path(s.primitive, sx: sx, sy: sy), with: .color(Color(red: 0.2, green: 0.25, blue: 0.33)), lineWidth: 1)
+                let unit = min(sx, sy)
+                let all = shapes(for: view)
+                // One silhouette, like the web body map: stroke every region here, then fill them borderless on top,
+                // so only the figure's outer edge shows — a body, not a stack of parts.
+                let outline = Color(red: 127 / 255, green: 144 / 255, blue: 168 / 255)
+                for s in all {
+                    ctx.stroke(path(s.primitive, sx: sx, sy: sy), with: .color(outline), style: StrokeStyle(lineWidth: 2.6 * unit, lineJoin: .round))
                 }
+                for s in all {
+                    let marked = selectedKey == s.key || shading[s.key] != nil
+                    let fill = selectedKey == s.key
+                        ? Color(red: 37 / 255, green: 99 / 255, blue: 235 / 255)
+                        : (shading[s.key] ?? Color(red: 227 / 255, green: 233 / 255, blue: 241 / 255))
+                    let p = path(s.primitive, sx: sx, sy: sy)
+                    ctx.fill(p, with: .color(fill))
+                    // only a region that carries information gets an edge
+                    if marked { ctx.stroke(p, with: .color(Color.white.opacity(0.7)), lineWidth: unit) }
+                }
+                // Which side is which: "left" is the viewer's left in both views (the front view is a mirror).
+                let tint = Color(red: 138 / 255, green: 151 / 255, blue: 171 / 255)
+                let side = { (label: String) in Text(label).font(.system(size: 11 * unit, weight: .semibold)).foregroundColor(tint) }
+                ctx.draw(side("L"), at: CGPoint(x: 34 * sx, y: 205 * sy))
+                ctx.draw(side("R"), at: CGPoint(x: 166 * sx, y: 205 * sy))
             }
             .contentShape(Rectangle())
             .gesture(DragGesture(minimumDistance: 0).onEnded { value in

@@ -3,7 +3,9 @@ import * as React from "react";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-function applyTheme(next: "light" | "dark") {
+export type Theme = "light" | "dark";
+
+export function applyTheme(next: Theme) {
   document.documentElement.dataset.theme = next;
   document.documentElement.classList.toggle("dark", next === "dark");
   try {
@@ -13,13 +15,21 @@ function applyTheme(next: "light" | "dark") {
   }
 }
 
+export function currentTheme(): Theme {
+  return (document.documentElement.dataset.theme as Theme) || "light";
+}
+
 export function ThemeToggle() {
-  const [theme, setTheme] = React.useState<"light" | "dark">("light");
+  const [theme, setTheme] = React.useState<Theme>("light");
 
   React.useEffect(() => {
-    const current = (document.documentElement.dataset.theme as "light" | "dark") || "light";
+    const current = currentTheme();
     setTheme(current);
     document.documentElement.classList.toggle("dark", current === "dark");
+    // The palette can flip the theme too — stay in sync with it.
+    const onChange = () => setTheme(currentTheme());
+    window.addEventListener("ht:theme", onChange);
+    return () => window.removeEventListener("ht:theme", onChange);
   }, []);
 
   const toggle = () => {
@@ -31,13 +41,16 @@ export function ThemeToggle() {
   return (
     <Button
       type="button"
-      variant="ghost"
+      variant="outline"
       size="icon"
+      className="theme-toggle size-[34px] rounded-full bg-card shadow-xs"
       onClick={toggle}
       aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
       title="Toggle theme"
     >
-      {theme === "dark" ? <Sun /> : <Moon />}
+      <span key={theme} className="swap grid place-items-center">
+        {theme === "dark" ? <Sun /> : <Moon />}
+      </span>
     </Button>
   );
 }

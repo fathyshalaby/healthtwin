@@ -20,25 +20,31 @@ export const ReviewPanel: React.FC<{ initialView?: BodyView }> = ({ initialView 
   const from = days != null ? new Date(Date.now() - days * 86_400_000).toISOString() : undefined;
 
   return (
-    <div>
-      <ViewToggle view={view} onChange={setView} />
-      <div role="radiogroup" aria-label="Date range">
-        {RANGES.map((r) => (
-          <label key={r.label}>
-            <input type="radio" name="ht-range" aria-label={r.label} checked={days === r.days} onChange={() => setDays(r.days)} /> {r.label}
-          </label>
-        ))}
+    <div className="ht-review">
+      <div className="ht-review-controls">
+        <ViewToggle view={view} onChange={setView} />
+        <div role="radiogroup" aria-label="Date range">
+          {RANGES.map((r) => (
+            <label key={r.label}>
+              <input type="radio" name="ht-range" aria-label={r.label} checked={days === r.days} onChange={() => setDays(r.days)} /> {r.label}
+            </label>
+          ))}
+        </div>
       </div>
 
-      <BodyMapReview view={view} from={from} selectedRegionId={regionId} onRegionSelect={setRegionId} />
+      <div className="ht-review-map">
+        <BodyMapReview view={view} from={from} selectedRegionId={regionId} onRegionSelect={setRegionId} />
+      </div>
 
-      {regionId && (
-        <button type="button" onClick={() => setRegionId(null)}>
-          Clear region filter: {getRegion(regionId)?.label ?? regionId}
-        </button>
-      )}
-
-      <Timeline filter={{ regionId: regionId ?? undefined, from }} />
+      <div className="ht-review-side">
+        <h2 className="ht-side-title">Timeline</h2>
+        {regionId && (
+          <button type="button" className="ht-clear" onClick={() => setRegionId(null)}>
+            Clear region filter: {getRegion(regionId)?.label ?? regionId}
+          </button>
+        )}
+        <Timeline filter={{ regionId: regionId ?? undefined, from }} />
+      </div>
     </div>
   );
 };
